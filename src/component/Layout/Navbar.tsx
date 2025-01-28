@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { Disclosure } from "@headlessui/react";
 
-import { auth0 } from "@/auth0";
+import { auth0 } from "@/lib/auth0";
 
 export default async function Navbar() {
   const session = await auth0.getSession();
