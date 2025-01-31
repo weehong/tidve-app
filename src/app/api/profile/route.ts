@@ -18,6 +18,7 @@ export async function GET() {
     const profile = await prisma.profile.findUnique({
       where: {
         userId: session?.user.sub,
+        email: session?.user.email,
       },
     });
 
@@ -27,6 +28,7 @@ export async function GET() {
     }
 
     console.debug("Profile found", profile);
+
     return NextResponse.json(profile);
   } catch (error) {
     console.error("Error getting profile", error);
@@ -56,6 +58,7 @@ export async function POST(request: NextRequest) {
       },
       create: {
         userId: session?.user.sub!,
+        email: session?.user.email!,
         isInitial: body.isInitial || true,
         currency: body.currency,
       },

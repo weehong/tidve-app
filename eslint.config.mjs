@@ -7,6 +7,7 @@ const __dirname = dirname(__filename);
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
+  recommendedConfig: typeScriptEsLintPlugin.configs["recommended"],
 });
 
 export default {
@@ -15,7 +16,7 @@ export default {
       "next/core-web-vitals",
       "eslint:recommended",
       "plugin:@typescript-eslint/recommended",
-      "plugin:react-hooks/recommended"
+      "plugin:react-hooks/recommended",
     ),
   ],
   ignorePatterns: ["node_modules/*", ".next/*", "!.prettierrc.config.mjs"],

@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Profile } from "@prisma/client";
+import { Profile, Subscription } from "@prisma/client";
 import { useForm } from "react-hook-form";
+import useSWR from "swr";
 
 import { CurrencySelect } from "@/component/Form/Subscription/CurrencySelector";
 import { FormField } from "@/component/Form/Subscription/FormField";
@@ -16,14 +17,15 @@ import {
   SubscriptionFormSchema,
   type SubscriptionFormValues,
 } from "@/lib/validation/subscription";
-import { CurrenciesProp } from "@/type/CurrencyProp";
 
 export default function SubscriptionForm({
   baseCurrency,
+  subscription,
 }: {
   baseCurrency: Pick<Profile, "currency">;
+  subscription?: Subscription | null;
 }) {
-  const [currencies, setCurrencies] = useState<CurrenciesProp>();
+  const { data: currencies } = useSWR("currencies", getCurrencies);
   const router = useRouter();
   const {
     register,
@@ -33,24 +35,22 @@ export default function SubscriptionForm({
     formState: { errors },
   } = useForm<SubscriptionFormValues>({
     defaultValues: {
-      name: "",
-      currency: baseCurrency.currency,
-      price: 0,
-      cycle: 1,
-      start_date: new Date().toISOString().split("T")[0],
-      end_date: new Date().toISOString().split("T")[0],
+      name: subscription?.name ?? "",
+      currency: subscription?.currency ?? baseCurrency.currency,
+      price: subscription?.price ?? 0,
+      cycle: subscription?.cycleInMonths ?? 1,
+      start_date: subscription?.startDate
+        ? new Date(subscription.startDate).toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0],
+      end_date: subscription?.endDate
+        ? new Date(subscription.endDate).toISOString().split("T")[0]
+        : new Date().toISOString().split("T")[0],
     },
     resolver: zodResolver(SubscriptionFormSchema),
   });
 
   const startDate = watch("start_date");
   const cycle = watch("cycle");
-
-  useEffect(() => {
-    getCurrencies().then((currencies) => {
-      setCurrencies(currencies);
-    });
-  }, []);
 
   useEffect(() => {
     if (startDate && cycle) {
@@ -62,10 +62,19 @@ export default function SubscriptionForm({
   }, [startDate, cycle, setValue]);
 
   const onSubmit = async (data: SubscriptionFormValues) => {
-    const res = await fetch("/api/subscription", {
-      method: "POST",
-      body: JSON.stringify(data),
-    });
+    let res;
+
+    if (subscription) {
+      res = await fetch(`/api/subscription/${subscription.id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+    } else {
+      res = await fetch("/api/subscription", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    }
 
     if (res.ok) {
       router.push("/subscription");
@@ -87,7 +96,7 @@ export default function SubscriptionForm({
           register={register}
           error={errors.currency}
           currencies={currencies}
-          className="col-span-2 sm:col-span-1"
+          className="col-span-2"
         />
 
         <FormField
@@ -97,7 +106,7 @@ export default function SubscriptionForm({
           step="0.01"
           register={register}
           error={errors.price}
-          className="col-span-4 sm:col-span-3"
+          className="col-span-4"
           onBlur={(e) => {
             const value = parseFloat(e.target.value);
             if (!isNaN(value)) {
@@ -155,7 +164,7 @@ export default function SubscriptionForm({
           type="submit"
           className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
         >
-          Create
+          {subscription ? "Update" : "Create"}
         </button>
       </div>
     </form>

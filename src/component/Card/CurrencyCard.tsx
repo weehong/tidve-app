@@ -22,8 +22,9 @@ export default function CurrencyCard({
     "subscription",
     getSubscriptions,
   );
+
   const { data: exchangeRates, isLoading: isExchangeRatesLoading } = useSWR(
-    profile?.currency,
+    "exchange",
     getExchangeRates,
   );
 
@@ -44,7 +45,9 @@ export default function CurrencyCard({
     0,
   );
 
-  return (
+  return isLoading || isExchangeRatesLoading ? (
+    <div>Loading...</div>
+  ) : (
     <div className="divide-y divide-gray-200 overflow-hidden rounded-lg bg-white shadow">
       <div className="px-4 py-5 sm:p-6">
         <span className="text-sm text-gray-500">{title}</span>

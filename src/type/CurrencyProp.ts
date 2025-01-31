@@ -8,6 +8,6 @@ export type CurrencyInfo = {
   symbol_native: string;
 };
 
-export interface CurrenciesProp {
+export interface CurrenciesProps {
   [key: string]: CurrencyInfo;
 }

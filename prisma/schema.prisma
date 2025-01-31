@@ -10,12 +10,42 @@ datasource db {
 model Profile {
   id        Int      @id @default(autoincrement())
   userId    String   @unique @map("user_id")
+  email     String   @unique @map("email")
   isInitial Boolean  @default(true) @map("is_initial")
   currency  String   @map("currency")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
+  @@index([userId])
+  @@index([email])
   @@map("profiles")
+}
+
+model Currency {
+  id             Int      @id @default(autoincrement())
+  code           String   @unique @map("code")
+  name           String   @map("name")
+  decimal_digits Int      @map("decimal_digits")
+  name_plural    String   @map("name_plural")
+  rounding       Int      @map("rounding")
+  symbol         String   @map("symbol")
+  symbol_native  String   @map("symbol_native")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([code])
+  @@map("currencies")
+}
+
+model ExchangeRate {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique @map("code")
+  rate      Float    @map("rate")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([code])
+  @@map("exchange_rates")
 }
 
 model Subscription {
@@ -31,5 +61,7 @@ model Subscription {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
 
+  @@index([userId])
+  @@index([name])
   @@map("subscriptions")
 }
