@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { auth0 } from "@/auth0";
+import { auth0 } from "@/lib/auth/auth0";
 
 export async function middleware(request: NextRequest) {
   const res = await auth0.middleware(request);
@@ -12,11 +12,11 @@ export async function middleware(request: NextRequest) {
       console.debug(
         "[Middleware] User is not logged in, redirecting to sign in",
       );
-      return NextResponse.redirect(
-        `${request.nextUrl.origin}/auth/login?returnTo=${encodeURIComponent(
-          request.nextUrl.pathname,
-        )}`,
-      );
+      const redirectUrl = `${request.nextUrl.origin}/auth/login?returnTo=${encodeURIComponent(
+        request.nextUrl.pathname,
+      )}`;
+      console.debug("[Middleware] Redirecting to:", redirectUrl);
+      return NextResponse.redirect(redirectUrl);
     }
   }
 
