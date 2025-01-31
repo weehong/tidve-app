@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const SubscriptionFormSchema = z.object({
+  id: z.number().optional(),
   name: z.string().min(1, { message: "Name is required" }),
   currency: z.string().min(1, { message: "Currency is required" }),
   price: z.number().min(0.01, { message: "Price must be greater than 0" }),

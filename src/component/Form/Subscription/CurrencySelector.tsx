@@ -2,12 +2,12 @@ import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { FieldError, UseFormRegister } from "react-hook-form";
 
 import { SubscriptionFormValues } from "@/lib/validation/subscription";
-import { CurrenciesProp } from "@/type/CurrencyProp";
+import { CurrenciesProps } from "@/type/CurrencyProp";
 
 interface CurrencySelectProps {
   register: UseFormRegister<SubscriptionFormValues>;
   error?: FieldError;
-  currencies: CurrenciesProp | undefined;
+  currencies: CurrenciesProps | undefined;
   className?: string;
 }
 
@@ -34,8 +34,8 @@ export function CurrencySelect({
         >
           {currencies &&
             Object.entries(currencies).map(([code]) => (
-              <option key={code} value={code}>
-                {code}
+              <option key={currencies[code].code} value={currencies[code].code}>
+                {currencies[code].code}
               </option>
             ))}
         </select>

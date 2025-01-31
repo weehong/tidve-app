@@ -12,7 +12,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`antialiased ${inter.className}`}>
+      <body className={`antialiased ${inter.className} min-h-full`}>
         <Navbar />
         {children}
       </body>

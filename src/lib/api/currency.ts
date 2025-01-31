@@ -1,29 +1,39 @@
-import { CurrenciesProp } from "@/type/CurrencyProp";
-
-export const getExchangeRates = async (baseCurrency: string) => {
-  const res = await fetch(
-    `https://api.fxratesapi.com/latest?base=${baseCurrency}`,
-  );
+export const getExternalExchangeRates = async () => {
+  const res = await fetch("https://api.fxratesapi.com/latest?base=USD");
 
   if (!res.ok) {
     throw new Error("Failed to fetch exchange rates");
   }
 
-  const data = await res.json();
-
-  return data.rates;
+  return await res.json();
 };
 
-export const getCurrencies = async () => {
+export const getExternalCurrencies = async () => {
   const res = await fetch("https://api.fxratesapi.com/currencies");
 
   if (!res.ok) {
     throw new Error("Failed to fetch currencies");
   }
 
-  const data = (await res.json()) as CurrenciesProp;
+  return await res.json();
+};
 
-  return Object.fromEntries(
-    Object.entries(data).sort(([keyA], [keyB]) => keyA.localeCompare(keyB)),
-  );
+export const getExchangeRates = async () => {
+  const res = await fetch("/api/exchange");
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch exchange rates");
+  }
+
+  return await res.json();
+};
+
+export const getCurrencies = async () => {
+  const res = await fetch("/api/currency");
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch currencies");
+  }
+
+  return await res.json();
 };

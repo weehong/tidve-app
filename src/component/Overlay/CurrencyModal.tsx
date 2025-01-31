@@ -10,33 +10,11 @@ import {
 } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useAtom } from "jotai";
-import { useSWRConfig } from "swr";
+import useSWR, { useSWRConfig } from "swr";
 
 import { profileAtom } from "@/atom/userAtom";
 import { getCurrencies } from "@/lib/api/currency";
-import { CurrenciesProp } from "@/type/CurrencyProp";
-
-const getProfile = async () => {
-  const res = await fetch("/api/profile");
-
-  if (!res.ok) {
-    return null;
-  }
-
-  return res.json();
-};
-
-const createProfile = async (currency: string) => {
-  const res = await fetch("/api/profile", {
-    method: "POST",
-    body: JSON.stringify({
-      isInitial: true,
-      currency,
-    }),
-  });
-
-  return res.json();
-};
+import { createProfile, getProfile } from "@/lib/api/profile";
 
 export default function CurrencyModal({
   title,
@@ -45,19 +23,13 @@ export default function CurrencyModal({
   title: React.ReactNode;
   description: React.ReactNode;
 }>) {
-  const [currencies, setCurrencies] = useState<CurrenciesProp | null>({});
+  const { data: currencies } = useSWR("currencies", getCurrencies);
   const [selectedCurrency, setSelectedCurrency] = useState<string | null>(
     "USD",
   );
   const [profile, setProfile] = useAtom(profileAtom);
   const [open, setOpen] = useState(false);
   const { mutate } = useSWRConfig();
-
-  useEffect(() => {
-    getCurrencies().then((currencies) => {
-      setCurrencies(currencies);
-    });
-  }, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -117,8 +89,12 @@ export default function CurrencyModal({
                   >
                     {currencies &&
                       Object.entries(currencies).map(([code]) => (
-                        <option key={code} value={code}>
-                          {code} &mdash; {currencies[code].name}
+                        <option
+                          key={currencies[code].code}
+                          value={currencies[code].code}
+                        >
+                          {currencies[code].code} &mdash;{" "}
+                          {currencies[code].name}
                         </option>
                       ))}
                   </select>
