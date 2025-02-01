@@ -8,23 +8,18 @@ import {
 } from "@headlessui/react";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
-import { deleteSubscription } from "@/lib/api/subscription";
-
-const handleDelete = async (mutate: () => void, id: number) => {
-  await deleteSubscription(id);
-  mutate();
-};
-
 export default function DeleteDialog({
   isOpen,
   setIsOpen,
-  id,
-  mutate,
+  onAction,
+  title,
+  description,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  id: number;
-  mutate: () => void;
+  onAction: () => void;
+  title: string;
+  description: string;
 }) {
   return (
     <Dialog open={isOpen} onClose={setIsOpen} className="relative z-10">
@@ -51,19 +46,20 @@ export default function DeleteDialog({
                   as="h3"
                   className="text-base font-semibold text-gray-900"
                 >
-                  Delete Subscription
+                  {title}
                 </DialogTitle>
                 <div className="mt-2">
-                  <p className="text-sm text-gray-500">
-                    Are you sure you want to delete this subscription?
-                  </p>
+                  <p className="text-sm text-gray-500">{description}</p>
                 </div>
               </div>
             </div>
             <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
               <button
                 type="button"
-                onClick={() => handleDelete(mutate, id)}
+                onClick={() => {
+                  onAction();
+                  setIsOpen(false);
+                }}
                 className="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600 sm:col-start-2"
               >
                 Deactivate

@@ -73,3 +73,40 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  try {
+    const session = await auth0.getSession();
+
+    if (!session?.user.sub) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const profile = await prisma.profile.delete({
+      where: {
+        userId: session.user.sub,
+      },
+    });
+
+    const subscriptions = await prisma.subscription.deleteMany({
+      where: {
+        userId: session.user.sub,
+      },
+    });
+
+    if (!profile || !subscriptions) {
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({ message: "Account reset" }, { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
+  }
+}

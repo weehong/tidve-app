@@ -47,7 +47,6 @@ export async function GET(request: NextRequest) {
               },
             });
 
-            // Determine if it was created or updated
             const existing = await prisma.currency.findUnique({
               where: { code },
               select: { code: true },

@@ -17,7 +17,7 @@ export default async function RootLayout({
     <html lang="en">
       <body className={`antialiased ${inter.className}`}>
         <CurrencyModal
-          title={<h1>Setup your base currency</h1>}
+          title={<p>Setup your base currency</p>}
           description={
             <p>
               Once you have setup your base currency, you can start adding your

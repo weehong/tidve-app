@@ -1,61 +1,53 @@
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 import { PrismaClient } from "@prisma/client";
 
-import { getExternalExchangeRates } from "@/lib/api/currency";
-import { ExchangeRateResponse } from "@/type/ExchangeRateProp";
+import { getExternalCurrencies } from "@/lib/api/currency";
+import { CurrenciesProps } from "@/type/CurrencyProp";
 
 const prisma = new PrismaClient();
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const response: ExchangeRateResponse = await getExternalExchangeRates();
-
-    if (!response.success || !response.rates) {
-      return NextResponse.json(
-        { error: "Failed to fetch exchange rates" },
-        { status: 500 },
-      );
-    }
-
-    const results = {
-      created: 0,
-      updated: 0,
-      skipped: 0,
-      errors: 0,
-    };
-
-    const currencies = Object.entries(response.rates);
+    const currencies: CurrenciesProps = await getExternalCurrencies();
+    const results = { created: 0, updated: 0, errors: 0 };
+    const currencyEntries = Object.entries(currencies);
     const BATCH_SIZE = 50;
 
-    for (let i = 0; i < currencies.length; i += BATCH_SIZE) {
-      const batch = currencies.slice(i, i + BATCH_SIZE);
+    for (let i = 0; i < currencyEntries.length; i += BATCH_SIZE) {
+      const batch = currencyEntries.slice(i, i + BATCH_SIZE);
 
       await Promise.all(
-        batch.map(async ([code, newRate]) => {
+        batch.map(async ([code, currencyData]) => {
           try {
-            const existingRate = await prisma.exchangeRate.findUnique({
-              where: { code: code.toUpperCase() },
+            const existing = await prisma.currency.findUnique({
+              where: { code },
+              select: { code: true },
             });
 
-            if (existingRate) {
-              if (Number(newRate) > Number(existingRate.rate)) {
-                await prisma.exchangeRate.update({
-                  where: { code: code.toUpperCase() },
-                  data: {
-                    rate: Number(newRate),
-                    updatedAt: new Date(),
-                  },
-                });
-                results.updated++;
-              } else {
-                results.skipped++;
-              }
-            } else {
-              await prisma.exchangeRate.create({
+            if (existing) {
+              await prisma.currency.update({
+                where: { code },
                 data: {
-                  code: code.toUpperCase(),
-                  rate: Number(newRate),
+                  name: currencyData.name,
+                  decimal_digits: currencyData.decimal_digits,
+                  name_plural: currencyData.name_plural,
+                  rounding: currencyData.rounding,
+                  symbol: currencyData.symbol,
+                  symbol_native: currencyData.symbol_native,
+                },
+              });
+              results.updated++;
+            } else {
+              await prisma.currency.create({
+                data: {
+                  code,
+                  name: currencyData.name,
+                  decimal_digits: currencyData.decimal_digits,
+                  name_plural: currencyData.name_plural,
+                  rounding: currencyData.rounding,
+                  symbol: currencyData.symbol,
+                  symbol_native: currencyData.symbol_native,
                 },
               });
               results.created++;
@@ -69,20 +61,18 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      message: "Exchange rates processed successfully",
-      timestamp: response.date,
-      base: response.base,
+      message: "Currencies processed successfully",
       results: {
-        totalProcessed: currencies.length,
+        totalProcessed: currencyEntries.length,
         ...results,
-        summary: `Created: ${results.created}, Updated: ${results.updated}, Skipped: ${results.skipped}, Errors: ${results.errors}`,
+        summary: `Created: ${results.created}, Updated: ${results.updated}, Errors: ${results.errors}`,
       },
     });
   } catch (error) {
-    console.error("Error updating exchange rates:", error);
+    console.error("Error updating currencies:", error);
     return NextResponse.json(
       {
-        error: "Failed to process exchange rates",
+        error: "Failed to process currencies",
         details: error instanceof Error ? error.message : "Unknown error",
       },
       { status: 500 },

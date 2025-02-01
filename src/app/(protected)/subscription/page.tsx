@@ -12,7 +12,7 @@ import useSWR from "swr";
 import { profileAtom } from "@/atom/userAtom";
 import DeleteDialog from "@/component/Dialog/DeleteDialog";
 import { getExchangeRates } from "@/lib/api/currency";
-import { getSubscriptions } from "@/lib/api/subscription";
+import { deleteSubscription, getSubscriptions } from "@/lib/api/subscription";
 import { convertBaseCurrency } from "@/lib/helper/currency";
 
 export default function SubscriptionPage() {
@@ -28,6 +28,11 @@ export default function SubscriptionPage() {
     getExchangeRates,
   );
 
+  const handleDelete = async (id: number) => {
+    await deleteSubscription(id);
+    mutate();
+  };
+
   if (isLoading || isExchangeRatesLoading) return <div>Loading...</div>;
 
   return (
@@ -41,7 +46,7 @@ export default function SubscriptionPage() {
           Create
         </Link>
       </div>
-      <div className="mt-8 flow-root">
+      <div className="mt-8 flow-root overflow-x-auto">
         <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8"></div>
         <table className="min-w-full divide-y divide-gray-300">
           <thead>
@@ -140,10 +145,13 @@ export default function SubscriptionPage() {
                       </button>
                       {isDeleteModalOpen && (
                         <DeleteDialog
-                          id={subscription.id}
-                          mutate={mutate}
                           isOpen={isDeleteModalOpen}
                           setIsOpen={setIsDeleteModalOpen}
+                          onAction={() => handleDelete(subscription.id)}
+                          title={"Delete Subscription"}
+                          description={
+                            "Are you sure you want to delete this subscription?"
+                          }
                         />
                       )}
                     </div>

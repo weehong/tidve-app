@@ -23,3 +23,15 @@ export const createProfile = async (currency: string) => {
 
   return res.json();
 };
+
+export const deleteProfile = async () => {
+  const res = await fetch(`/api/profile`, {
+    method: "DELETE",
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to delete profile");
+  }
+
+  return res.json();
+};
