@@ -1,0 +1,61 @@
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap");
+
+@tailwind base;
+
+@layer base {
+  @font-face {
+    font-display: swap;
+    font-family: Canela Text;
+    font-style: normal;
+    font-weight: 100;
+    src: url("../fonts/CanelaText-Thin.woff2") format("woff2");
+  }
+
+  @font-face {
+    font-display: swap;
+    font-family: Canela Text;
+    font-style: normal;
+    font-weight: 300;
+    src: url("../fonts/CanelaText-Light.woff2") format("woff2");
+  }
+
+  @font-face {
+    font-display: swap;
+    font-family: Canela Text Italic;
+    font-style: italic;
+    font-weight: 300;
+    src: url("../fonts/CanelaText-LightItalic.woff2") format("woff2");
+  }
+
+  @font-face {
+    font-display: swap;
+    font-family: Canela Text;
+    font-style: normal;
+    font-weight: 400;
+    src: url("../fonts/CanelaText-Regular.woff2") format("woff2");
+  }
+
+  @font-face {
+    font-display: swap;
+    font-family: Roobert;
+    font-style: normal;
+    font-weight: 400;
+    src: url("../fonts/Roobert-Regular.woff2") format("woff2");
+  }
+
+  @font-face {
+    font-display: swap;
+    font-family: Roobert;
+    font-style: normal;
+    font-weight: 300;
+    src: url("../fonts/Roobert-Light.woff2") format("woff2");
+  }
+
+  @font-face {
+    font-display: swap;
+    font-family: Roobert;
+    font-style: normal;
+    font-weight: 500;
+    src: url("../fonts/Roobert-Medium.woff2") format("woff2");
+  }
+}
