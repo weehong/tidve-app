@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { Disclosure } from "@headlessui/react";
@@ -13,15 +14,19 @@ export default async function Navbar() {
         <div className="flex h-16 justify-between">
           <div className="flex">
             <div className="flex shrink-0 items-center">
-              <img
+              <Image
                 alt="Your Company"
                 src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
                 className="block h-8 w-auto lg:hidden"
+                width={32}
+                height={32}
               />
-              <img
+              <Image
                 alt="Your Company"
                 src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
                 className="hidden h-8 w-auto lg:block"
+                width={32}
+                height={32}
               />
             </div>
           </div>
