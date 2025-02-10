@@ -12,6 +12,9 @@
     "@auth0/nextjs-auth0": "^4.0.0-beta.14",
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
+    "@tanstack/match-sorter-utils": "^8.19.4",
+    "@tanstack/react-table": "^8.20.6",
+    "classnames": "^2.5.1",
     "next": "15.1.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
