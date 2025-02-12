@@ -35,13 +35,13 @@ export default async function Navbar() {
               <div className="flex items-center gap-x-5">
                 <Link
                   href="/dashboard"
-                  className="text-sm font-medium hover:text-indigo-500"
+                  className="text-sm font-medium hover:text-indigo-600"
                 >
                   Dashboard
                 </Link>
                 <a
                   href="/auth/logout"
-                  className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                  className="text-sm font-medium text-indigo-600 hover:text-indigo-600"
                 >
                   Logout
                 </a>
@@ -49,7 +49,7 @@ export default async function Navbar() {
             ) : (
               <a
                 href="/auth/login"
-                className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                className="text-sm font-medium text-indigo-600 hover:text-indigo-600"
               >
                 Login
               </a>

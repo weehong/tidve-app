@@ -1,70 +1,73 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 import { auth0 } from "@/libs/auth/auth0";
 
-export async function GET(request: NextRequest) {
-  const session = await auth0.getSession();
-
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  //   const { email, name, picture } = user;
-
-  return NextResponse.json({ message: "Hello, world!" });
-}
-
-export async function PATCH(request: NextRequest) {
+export async function PATCH(request: Request) {
   try {
-    // const session = await auth0.getSession();
-    const token = await auth0.getAccessToken();
+    const [token, session] = await Promise.all([
+      getAccessToken(),
+      auth0.getSession(),
+    ]);
 
-    // if (!session) {
-    //   return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    // }
+    if (!token || !session?.user?.sub) {
+      return NextResponse.json(
+        { error: "No token or session found" },
+        { status: 401 },
+      );
+    }
 
-    // const { user } = session;
-    const tokenResponse = await fetch(
-      `${process.env.AUTH0_DOMAIN}/oauth/token`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          client_id: process.env.AUTH0_MANAGEMENT_CLIENT_ID,
-          client_secret: process.env.AUTH0_MANAGEMENT_CLIENT_SECRET,
-          audience: process.env.AUTH0_MANAGEMENT_DOMAIN + "/",
-          grant_type: "client_credentials",
-        }),
-      },
-    );
-
-    const { access_token } = await tokenResponse.json();
-
+    const { baseCurrency } = await request.json();
     const response = await fetch(
-      `${process.env.AUTH0_MANAGEMENT_DOMAIN}/users/google-oauth2|107034685493956754943`,
+      `${process.env.AUTH0_MANAGEMENT_DOMAIN}/users/${session.user.sub}`,
       {
         method: "PATCH",
         headers: {
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-          Authorization: `Bearer ${access_token}`,
         },
         body: JSON.stringify({
-          app_metadata: {
-            base_currency: "SDASDA",
-          },
+          user_metadata: { base_currency: baseCurrency },
         }),
       },
     );
-
-    const data = await response.json();
-
-    return NextResponse.json(data);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return NextResponse.json(
+        { error: errorData.message || "Failed to update base currency" },
+        { status: response.status },
+      );
+    }
+    const result = await response.json();
+    return NextResponse.json(result);
   } catch (error) {
+    console.error("Error updating base currency:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: "Failed to update base currency" },
       { status: 500 },
     );
   }
 }
+
+const getAccessToken = async () => {
+  try {
+    const res = await fetch(`${process.env.AUTH0_DOMAIN}/oauth/token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        grant_type: "client_credentials",
+        client_id: process.env.AUTH0_MANAGEMENT_CLIENT_ID,
+        client_secret: process.env.AUTH0_MANAGEMENT_CLIENT_SECRET,
+        audience: `${process.env.AUTH0_MANAGEMENT_DOMAIN}/`,
+      }),
+    });
+
+    const { access_token } = await res.json();
+
+    return access_token;
+  } catch (error) {
+    console.error("Error getting access token:", error);
+    return null;
+  }
+};
