@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Profile {
+  id        Int      @id @default(autoincrement())
+  userId    String   @unique @map("user_id")
+  email     String   @unique @map("email")
+  isInitial Boolean  @default(true) @map("is_initial")
+  currency  String   @map("currency")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([email])
+  @@map("profiles")
+}
+
+model Subscription {
+  id            Int      @id @default(autoincrement())
+  userId        String   @map("user_id")
+  name          String   @map("name")
+  currency      String   @map("currency")
+  price         Float    @map("price")
+  startDate     DateTime @map("start_date")
+  endDate       DateTime @map("end_date")
+  cycleInMonths Int      @map("cycle_in_months")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([name])
+  @@map("subscriptions")
+}
+
+model Rate {
+  id        Int      @id @default(autoincrement())
+  code      String   @unique @map("code")
+  rate      Float    @map("rate")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([code])
+  @@map("rates")
+}

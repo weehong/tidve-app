@@ -1,3 +1,12 @@
+@use "tailwindcss" as *;
+
+@theme {
+  --font-roobert: "Roobert";
+  --font-canela: "Canela Text";
+  --font-bricolage: "Bricolage Grotesque";
+  --font-instrument: "Instrument Sans";
+}
+
 body {
   @apply font-bricolage;
 }

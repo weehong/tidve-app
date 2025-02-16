@@ -16,14 +16,14 @@ export default async function Navbar() {
             <div className="flex shrink-0 items-center">
               <Image
                 alt="Your Company"
-                src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
+                src={"/logo.png"}
                 className="block h-8 w-auto lg:hidden"
                 width={32}
                 height={32}
               />
               <Image
                 alt="Your Company"
-                src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600"
+                src={"/logo.png"}
                 className="hidden h-8 w-auto lg:block"
                 width={32}
                 height={32}
@@ -35,13 +35,13 @@ export default async function Navbar() {
               <div className="flex items-center gap-x-5">
                 <Link
                   href="/dashboard"
-                  className="text-sm font-medium hover:text-indigo-500"
+                  className="text-sm font-medium hover:text-indigo-600"
                 >
                   Dashboard
                 </Link>
                 <a
                   href="/auth/logout"
-                  className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                  className="text-sm font-medium text-indigo-600 hover:text-indigo-600"
                 >
                   Logout
                 </a>
@@ -49,7 +49,7 @@ export default async function Navbar() {
             ) : (
               <a
                 href="/auth/login"
-                className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+                className="text-sm font-medium text-indigo-600 hover:text-indigo-600"
               >
                 Login
               </a>

@@ -1,5 +1,24 @@
 @use "fonts" as *;
+@use "tailwindcss" as *;
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  --font-roobert: "Roobert";
+  --font-canela: "Canela Text";
+  --font-bricolage: "Bricolage Grotesque";
+  --font-instrument: "Instrument Sans";
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @apply font-roobert font-bold;
+}
+
+#sidebar {
+  [role="list"] {
+    @apply font-roobert;
+  }
+}
