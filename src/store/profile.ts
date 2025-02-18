@@ -1,6 +1,11 @@
 import { create } from "zustand";
 
-export const useProfileStore = create((set) => ({
+type CurrencyStore = {
+  baseCurrency: string | null;
+  setBaseCurrency: (baseCurrency: string) => void;
+};
+
+export const useCurrencyStore = create<CurrencyStore>((set) => ({
   baseCurrency: null,
   setBaseCurrency: (baseCurrency: string) => set({ baseCurrency }),
 }));

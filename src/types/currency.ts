@@ -1,4 +1,4 @@
-type CurrencyInfo = {
+type CurrencyInfoProps = {
   code: string;
   name: string;
   decimal_digits: number;
@@ -8,6 +8,11 @@ type CurrencyInfo = {
   symbol_native: string;
 };
 
-export interface CurrenciesProps {
-  [key: string]: CurrencyInfo;
-}
+export type CurrenciesProps = {
+  [key: string]: CurrencyInfoProps;
+};
+
+export type CurrencyOptionProps = {
+  value: string;
+  label: string;
+};

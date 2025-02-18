@@ -1,15 +1,11 @@
-export type ExchangeRateProps = {
-  id: number;
-  code: string;
-  rate: number;
-  createdAt: string;
-  updatedAt: string;
+export type RateProps = {
+  [key: string]: number;
 };
 
-export type ExchangeRateResponse = {
+export type CurrencyRateProps = {
   success: boolean;
   timestamp: number;
   date: string;
   base: string;
-  rates: ExchangeRateProps;
+  rates: RateProps;
 };

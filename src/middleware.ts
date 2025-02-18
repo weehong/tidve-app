@@ -31,6 +31,21 @@ export async function middleware(request: NextRequest) {
     if (!session) {
       return redirectToLogin(request);
     }
+
+    if (request.nextUrl.pathname !== "/wizard") {
+      const profile = await fetch(
+        `${request.nextUrl.origin}/api/profile?id=${session.user.sub}`,
+      ).then((res) => res.json());
+
+      if (!profile?.currency) {
+        return NextResponse.redirect(
+          new URL(
+            `${request.nextUrl.origin}/wizard?returnTo=/dashboard`,
+            request.url,
+          ),
+        );
+      }
+    }
   }
 
   return res;

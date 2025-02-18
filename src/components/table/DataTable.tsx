@@ -26,7 +26,6 @@ export function DataTable<TData>({
   isLoading = false,
   error = null,
   onRefresh,
-  header,
   searchPlaceholder = "Search all columns...",
   enableSorting = true,
   enableGlobalFilter = true,
@@ -41,11 +40,8 @@ export function DataTable<TData>({
   rowClassName,
   headerClassName,
   tableClassName,
-}: DataTableProps<TData> & {
-  enablePagination?: boolean;
-  defaultPageSize?: number;
-  defaultPageIndex?: number;
-}) {
+  modalComponent,
+}: DataTableProps<TData>): React.ReactNode {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
@@ -95,19 +91,26 @@ export function DataTable<TData>({
   });
 
   return (
-    <div className="flex flex-col gap-6">
-      {header && <h1 className="text-2xl font-bold">{header}</h1>}
-
+    <div className="flex h-full flex-col gap-6">
       {enableGlobalFilter && (
-        <TableSearch
-          globalFilter={globalFilter}
-          setGlobalFilter={setGlobalFilter}
-          searchPlaceholder={searchPlaceholder}
-        />
+        <div className="px-4 sm:px-6 lg:px-8">
+          <TableSearch
+            globalFilter={globalFilter}
+            setGlobalFilter={setGlobalFilter}
+            searchPlaceholder={searchPlaceholder}
+          />
+        </div>
       )}
 
+      {modalComponent}
+
       <div
-        className={classNames("relative", { "overflow-x-auto": !isLoading })}
+        className={classNames(
+          "relative mx-4 min-h-[calc(100vh-20.5rem)] flex-1 sm:mx-6 lg:mx-8",
+          {
+            "overflow-x-auto": !isLoading,
+          },
+        )}
       >
         <table
           className={classNames(
@@ -120,7 +123,7 @@ export function DataTable<TData>({
             stickyHeader={stickyHeader}
             headerClassName={headerClassName}
           />
-          <tbody>
+          <tbody className="flex flex-col gap-4 sm:table-row-group">
             <TableBody
               table={table}
               isLoading={isLoading}
