@@ -1,11 +1,11 @@
 import { rankItem } from "@tanstack/match-sorter-utils";
-import { FilterFn, Row } from "@tanstack/react-table";
+import { Row } from "@tanstack/react-table";
 
-export const fuzzyFilter: FilterFn<unknown> = <TData,>(
+export function fuzzyFilter<TData>(
   row: Row<TData>,
   columnId: string,
   filterValue: string,
-) => {
+): boolean {
   const itemRank = rankItem(row.getValue(columnId), filterValue);
   return itemRank.passed;
-};
+}

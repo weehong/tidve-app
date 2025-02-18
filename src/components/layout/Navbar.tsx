@@ -5,7 +5,7 @@ import { Disclosure } from "@headlessui/react";
 
 import { auth0 } from "@/libs/auth/auth0";
 
-export default async function Navbar() {
+export default async function Navbar(): Promise<React.ReactNode> {
   const session = await auth0.getSession();
 
   return (

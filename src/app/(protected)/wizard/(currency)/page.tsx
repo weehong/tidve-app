@@ -5,15 +5,14 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, FieldValues, useForm } from "react-hook-form";
-import Select from "react-select";
+import { FieldValues, useForm } from "react-hook-form";
 import useSWR from "swr";
 import { z } from "zod";
 
-import Spinner from "@/components/spinner/Spinner";
+import { Select } from "@/components/form/Select";
 import { getExternalCurrencies } from "@/libs/api/currency";
 import { updateBaseCurrency } from "@/libs/api/profile";
-import { CurrenciesProps } from "@/types/currency";
+import { renderCurrencyOption } from "@/utils/helper";
 
 const zodSchema = z.object({
   baseCurrency: z
@@ -37,18 +36,7 @@ type FormValues = {
   };
 };
 
-type CurrencyOption = {
-  value: string;
-  label: string;
-};
-
-const renderOption = (currencies: CurrenciesProps): CurrencyOption[] =>
-  Object.keys(currencies).map((key) => ({
-    value: currencies[key].code,
-    label: currencies[key].code,
-  }));
-
-export default function WizardPage() {
+export default function WizardPage(): React.ReactNode {
   const router = useRouter();
   const { data: currencies, isLoading } = useSWR(
     "/api/currency",
@@ -75,8 +63,6 @@ export default function WizardPage() {
           "returnTo",
         );
 
-        console.log("returnTo", returnTo);
-
         router.push(returnTo || "/dashboard");
       }
     } catch (error) {
@@ -85,12 +71,12 @@ export default function WizardPage() {
   };
 
   const currencyOptions = useMemo(
-    () => (currencies ? renderOption(currencies) : []),
+    () => (currencies ? renderCurrencyOption(currencies) : []),
     [currencies],
   );
 
   return (
-    <div className="mx-auto flex max-w-screen-sm flex-col gap-4">
+    <div className="mx-auto flex max-w-screen-sm flex-col gap-4 px-4 py-10 sm:px-6 lg:px-8">
       <h1 className="text-center text-2xl font-bold">Select Base Currency</h1>
       <div>
         <p className="text-center text-sm text-gray-500">
@@ -102,32 +88,17 @@ export default function WizardPage() {
         className="mx-auto w-full sm:w-64"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <Controller
+        <Select
           name="baseCurrency"
           control={control}
-          render={({ field: { onChange, value, ...field } }) => (
-            <Select
-              {...field}
-              value={value}
-              className="block rounded-lg text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-indigo-500 dark:focus:ring-indigo-500"
-              options={currencyOptions}
-              placeholder="Select a currency"
-              isLoading={isLoading}
-              onChange={onChange}
-              components={{
-                LoadingIndicator: () => <Spinner className="mr-2 h-6 w-6" />,
-              }}
-            />
-          )}
+          options={currencyOptions}
+          placeholder="Select a currency"
+          isLoading={isLoading}
+          error={errors.baseCurrency?.message}
         />
-        {errors.baseCurrency && (
-          <p className="mt-2 text-sm text-red-500">
-            {errors.baseCurrency.message}
-          </p>
-        )}
         <button
           type="submit"
-          className="mt-4 inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2"
+          className="mt-4 inline-flex w-full justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-600 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600 sm:col-start-2"
         >
           Save
         </button>

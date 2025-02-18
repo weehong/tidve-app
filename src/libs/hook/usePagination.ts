@@ -8,7 +8,13 @@ export function usePagination({
 }: {
   defaultPageIndex?: number;
   defaultPageSize?: number;
-}) {
+}): {
+  pagination: {
+    pageIndex: number;
+    pageSize: number;
+  };
+  setPagination: (pagination: PaginationState) => void;
+} {
   const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
     pageIndex: defaultPageIndex,
     pageSize: defaultPageSize,

@@ -6,22 +6,21 @@ export type DataTableProps<TData> = {
   isLoading?: boolean;
   error?: Error | null;
   onRefresh?: () => void;
-  header?: string;
   searchPlaceholder?: string;
   enableSorting?: boolean;
   enableGlobalFilter?: boolean;
   enableColumnFilters?: boolean;
-  rowsPerPage?: number;
+  enablePagination?: boolean;
+  defaultPageSize?: number;
+  defaultPageIndex?: number;
   stickyHeader?: boolean;
   customLoadingComponent?: React.ReactNode;
   customErrorComponent?: React.ReactNode;
   onRowClick?: (row: TData) => void;
-  rowClassName?: string | ((row: TData) => string);
+  rowClassName?: string;
   headerClassName?: string;
   tableClassName?: string;
-  enablePagination?: boolean;
-  defaultPageSize?: number;
-  defaultPageIndex?: number;
+  modalComponent?: React.ReactNode;
 };
 
 export type TableSearchProps = {

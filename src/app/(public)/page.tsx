@@ -1,4 +1,4 @@
-export default function Home() {
+export default function Home(): React.ReactNode {
   return (
     <div className="flex h-[calc(100vh-65px)] w-screen flex-col items-center justify-center gap-4">
       <div className="flex max-w-2xl flex-col gap-2 gap-y-8 text-center">

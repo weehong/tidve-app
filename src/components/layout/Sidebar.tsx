@@ -1,14 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 import Image from "next/image";
 import Link from "next/link";
-import {
-  usePathname,
-  useRouter,
-  useSelectedLayoutSegment,
-} from "next/navigation";
+import { usePathname, useSelectedLayoutSegment } from "next/navigation";
 
 import { SessionData } from "@auth0/nextjs-auth0/types";
 import {
@@ -28,8 +24,10 @@ import {
   HomeIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import useSWR from "swr";
 
-import { useIsInitial } from "@/libs/hook/useIsInitial";
+import { getProfile } from "@/libs/api/profile";
+import { useCurrencyStore } from "@/store/profile";
 import { classNames } from "@/utils/helper";
 
 const navigation = [
@@ -54,33 +52,24 @@ const userNavigation = [
 export default function Sidebar({
   session,
   children,
-}: Readonly<{
+}: {
   session: SessionData | null;
   children: React.ReactNode;
-}>) {
-  const router = useRouter();
+}): React.ReactNode {
   const pathname = usePathname();
+  const setBaseCurrency = useCurrencyStore((state) => state.setBaseCurrency);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const activeSegment = useSelectedLayoutSegment();
-  const { profile, isInitial, currency, isLoading } = useIsInitial();
-
-  const needsWizard = useMemo(
-    () => !profile || isInitial || !currency,
-    [profile, isInitial, currency],
-  );
+  const { data, mutate } = useSWR("/api/profile", getProfile);
 
   useEffect(() => {
-    if (isLoading || pathname === "/wizard") return;
+    mutate();
 
-    if (needsWizard) {
-      try {
-        router.push(`/wizard?returnTo=${pathname}`);
-      } catch (error) {
-        console.error("Failed to redirect to wizard:", error);
-      }
+    if (data?.currency) {
+      setBaseCurrency(data.currency);
     }
-  }, [pathname, needsWizard, isLoading]);
+  }, [pathname]);
 
   return (
     <div id="sidebar">
@@ -115,7 +104,7 @@ export default function Sidebar({
               <div className="flex h-16 shrink-0 items-center">
                 <Image
                   alt="Your Company"
-                  src="https://tailwindui.com/plus/img/logos/mark.svg?color=white"
+                  src="/logo.png"
                   className="h-8 w-auto"
                   width={32}
                   height={32}
@@ -250,12 +239,12 @@ export default function Sidebar({
                   transition
                   className="absolute right-0 z-10 mt-2.5 w-48 origin-top-right rounded-md bg-white py-2 ring-1 shadow-lg ring-gray-900/5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[enter]:ease-out data-[leave]:duration-75 data-[leave]:ease-in"
                 >
-                  {currency && (
+                  {data?.currency && (
                     <MenuItem key="currency">
                       <span className="block border-b border-gray-200 px-3 py-1 text-sm/6 text-gray-500 data-[focus]:bg-gray-50 data-[focus]:outline-none">
                         Base Currency:{" "}
                         <span className="font-medium text-gray-800">
-                          {currency}
+                          {data.currency}
                         </span>
                       </span>
                     </MenuItem>
@@ -276,9 +265,7 @@ export default function Sidebar({
           </div>
         </div>
 
-        <main className="py-10">
-          <div className="px-4 sm:px-6 lg:px-8">{children}</div>
-        </main>
+        <main className="min-h-[calc(100vh-64px)]">{children}</main>
       </div>
     </div>
   );
