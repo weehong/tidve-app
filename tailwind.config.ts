@@ -12,6 +12,11 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      fontFamily: {
+        canela: ["Canela Text"],
+        roobert: ["Roobert"],
+        bricolage: ["Bricolage Grotesque"],
+      },
     },
   },
   plugins: [],
