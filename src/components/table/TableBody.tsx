@@ -77,7 +77,7 @@ export function TableBody<TData>({
         <tr
           key={row.id}
           className={classNames(
-            "flex flex-col rounded-md border border-gray-200 bg-white px-5 pt-5 sm:table-row sm:p-0 dark:border-gray-700 dark:bg-gray-800",
+            "flex flex-col rounded-md border border-gray-200 bg-white px-5 py-5 sm:table-row sm:p-0 dark:border-gray-700 dark:bg-gray-800",
             getRowClassName(row.original),
             { "cursor-pointer hover:bg-gray-50": onRowClick },
           )}
@@ -86,7 +86,7 @@ export function TableBody<TData>({
           {row.getVisibleCells().map((cell) => (
             <td
               key={cell.id}
-              className="min-w-32 py-1.5 font-medium whitespace-nowrap text-gray-900 sm:px-3 sm:py-3.5 dark:text-white"
+              className="py-1.5 align-top font-medium text-gray-900 sm:px-3 dark:text-white"
             >
               {flexRender(cell.column.columnDef.cell, cell.getContext())}
             </td>

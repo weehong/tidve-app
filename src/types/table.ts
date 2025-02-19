@@ -1,6 +1,7 @@
 import { ColumnDef, Table } from "@tanstack/react-table";
 
 export type DataTableProps<TData> = {
+  id: string;
   columns: ColumnDef<TData>[];
   data: TData[];
   isLoading?: boolean;
@@ -18,6 +19,7 @@ export type DataTableProps<TData> = {
   customErrorComponent?: React.ReactNode;
   onRowClick?: (row: TData) => void;
   rowClassName?: string;
+  wrapperClassName?: string;
   headerClassName?: string;
   tableClassName?: string;
   modalComponent?: React.ReactNode;

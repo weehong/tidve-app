@@ -62,7 +62,7 @@ export default function Toast() {
     <div
       role="alert"
       className={classNames(
-        "absolute top-5 left-1/2 z-50 ml-auto flex w-full max-w-xs -translate-x-1/2 items-center rounded-lg bg-white p-4 text-gray-500 shadow-sm transition sm:top-20 sm:right-5 sm:-translate-x-0 dark:bg-gray-800 dark:text-gray-400",
+        "absolute top-5 left-1/2 z-50 ml-auto flex w-full max-w-xs -translate-x-1/2 items-center rounded-lg p-4 text-gray-500 shadow-sm transition sm:top-20 sm:right-5 sm:-translate-x-0 dark:bg-gray-800 dark:text-gray-400",
         currentStyle.container,
       )}
     >
@@ -72,7 +72,7 @@ export default function Toast() {
           currentStyle.icon,
         )}
       >
-        <IconComponent className="h-5 w-5" />
+        <IconComponent className="h-10 w-10" />
       </div>
 
       <div className="mx-3 text-sm font-normal">{message}</div>
@@ -80,7 +80,7 @@ export default function Toast() {
       <button
         type="button"
         onClick={() => setIsOpen(false)}
-        className="ms-auto inline-flex h-8 w-8 items-center justify-center rounded-lg bg-white p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-900 focus:ring-2 focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-white"
+        className="ms-auto inline-flex h-8 w-8 items-center justify-center rounded-lg p-1.5 text-gray-900 hover:bg-gray-100 hover:text-gray-900 focus:ring-2 focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-white"
         aria-label="Close"
       >
         <span className="sr-only">Close</span>

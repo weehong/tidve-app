@@ -4,6 +4,7 @@ import { useEffect, useMemo } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Subscription } from "@prisma/client";
+import moment from "moment";
 import { useForm } from "react-hook-form";
 import useSWR, { useSWRConfig } from "swr";
 
@@ -34,8 +35,8 @@ type SubscriptionFormProps = {
 const INITIAL_FORM_VALUES: SubscriptionFormValues = {
   name: "",
   currency: {
-    value: "",
-    label: "",
+    value: "USD",
+    label: "USD",
   },
   price: 0,
   cycle: 1,
@@ -68,7 +69,6 @@ export default function SubscriptionForm({
   } = useForm<SubscriptionFormValues>({
     resolver: zodResolver(SubscriptionFormSchema),
     defaultValues: INITIAL_FORM_VALUES,
-    mode: "onSubmit",
   });
 
   const currencyOptions = useMemo(
@@ -81,11 +81,14 @@ export default function SubscriptionForm({
 
   useEffect(() => {
     if (watchedStartDate && watchedCycle) {
-      const startDate = new Date(watchedStartDate);
-      const endDate = new Date(startDate);
-      endDate.setMonth(endDate.getMonth() + Number(watchedCycle));
+      const startDate = moment(watchedStartDate);
+      let endDate = startDate.clone().add(Number(watchedCycle), "months");
 
-      setValue("end_date", endDate.toISOString().split("T")[0]);
+      if (startDate.date() === startDate.endOf("month").date()) {
+        endDate = endDate.endOf("month");
+      }
+
+      setValue("end_date", endDate.format("YYYY-MM-DD"));
     }
   }, [watchedStartDate, watchedCycle, reset]);
 
@@ -107,6 +110,18 @@ export default function SubscriptionForm({
         : INITIAL_FORM_VALUES.end_date,
     });
   }, [subscription, currencyOptions, reset]);
+
+  const submitAction = async (data: SubscriptionFormValues) => {
+    mutate("/api/subscription");
+    setIsOpen(false);
+    reset(INITIAL_FORM_VALUES);
+    setMessage(
+      `${data.name} has been ${subscription?.name ? "updated" : "created"} successfully.`,
+    );
+    setType("success");
+    setToastIsOpen(true);
+    setSubscription(undefined);
+  };
 
   const handleFormSubmit = handleSubmit(async (data) => {
     try {
@@ -131,15 +146,7 @@ export default function SubscriptionForm({
       }
 
       if (res) {
-        mutate("/api/subscription");
-        setIsOpen(false);
-        reset(INITIAL_FORM_VALUES);
-        setMessage(
-          `${data.name} has been ${subscription?.name ? "updated" : "created"} successfully.`,
-        );
-        setType("success");
-        setToastIsOpen(true);
-        setSubscription(undefined);
+        submitAction(data);
       }
     } catch (error) {
       console.error("Failed to submit form:", error);
@@ -151,7 +158,10 @@ export default function SubscriptionForm({
       title={subscription ? "Update Subscription" : "Create Subscription"}
       isOpen={isOpen}
       setIsOpen={setIsOpen}
-      onCloseAction={onCloseAction}
+      onCloseAction={() => {
+        reset(INITIAL_FORM_VALUES);
+        onCloseAction();
+      }}
     >
       <form className="mx-auto max-w-sm" onSubmit={handleFormSubmit}>
         <div className="grid grid-cols-9 gap-4">
@@ -182,15 +192,15 @@ export default function SubscriptionForm({
 
           <div className="col-span-9 sm:col-span-6">
             <InputField
-              type="text"
+              type="number"
               id="price"
               label="Price"
               name="price"
+              step=".01"
               register={register}
               error={!!errors.price}
               helperText={errors.price?.message}
               required
-              min={0}
               onBlur={(e) => {
                 !isNaN(parseInt(e.target.value)) &&
                   setValue("price", Number(e.target.value));
@@ -213,7 +223,7 @@ export default function SubscriptionForm({
 
           <div className="col-span-9 sm:col-span-3">
             <InputField
-              type="text"
+              type="number"
               id="cycle"
               label={
                 <>

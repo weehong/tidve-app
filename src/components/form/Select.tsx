@@ -43,7 +43,7 @@ const createSelectStyles = (hasError: boolean): StylesConfig => ({
     },
     ...(isFocused && {
       borderColor: COLORS.primary,
-      boxShadow: `0 0 0 2px ${COLORS.primary}`,
+      boxShadow: `0 0 0 1px ${COLORS.primary}`,
       "@media (prefers-color-scheme: dark)": {
         borderColor: COLORS.primary,
       },

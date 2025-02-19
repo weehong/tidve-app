@@ -1,0 +1,25 @@
+@use "tailwindcss" as *;
+
+#subscriptions-table {
+  th {
+    &:first-child {
+      @apply w-[26rem];
+    }
+
+    &:nth-child(2) {
+      @apply whitespace-normal;
+    }
+
+    &:nth-child(3) {
+      @apply w-[10rem];
+    }
+
+    &:last-child {
+      @apply w-32;
+
+      div {
+        @apply mx-auto;
+      }
+    }
+  }
+}

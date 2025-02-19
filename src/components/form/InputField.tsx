@@ -26,14 +26,7 @@ export default function InputField({
 
   const labelBaseClasses = "mb-2 block text-sm font-medium";
   const inputBaseClasses =
-    "block h-[38px] w-full rounded-lg border p-2 text-sm outline-none focus:ring-2 dark:text-white dark:placeholder-gray-400";
-
-  const labelClasses = classNames(
-    labelBaseClasses,
-    "text-gray-700",
-    hasError && "text-red-700 dark:text-red-500",
-    hasSuccess && "text-green-700 dark:text-green-500",
-  );
+    "block h-[38px] w-full rounded-lg border p-2 text-sm outline-none focus:ring dark:text-white dark:placeholder-gray-400";
 
   const inputClasses = classNames(
     inputBaseClasses,
@@ -65,7 +58,9 @@ export default function InputField({
       </label>
 
       <input
-        {...register(name)}
+        {...register(name, {
+          valueAsNumber: type === "number",
+        })}
         type={type}
         id={id}
         readOnly={readOnly}

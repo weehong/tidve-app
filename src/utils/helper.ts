@@ -1,8 +1,5 @@
 import { CurrenciesProps, CurrencyOptionProps } from "@/types/currency";
 
-export const classNames = (...classes: string[]) =>
-  classes.filter(Boolean).join(" ");
-
 export const renderCurrencyOption = (
   currencies: CurrenciesProps,
 ): CurrencyOptionProps[] =>

@@ -18,7 +18,7 @@ export function TableHeader<TData>({
   return (
     <thead
       className={classNames(
-        "hidden bg-gray-50 text-xs text-gray-700 uppercase sm:table-header-group dark:bg-gray-700 dark:text-gray-400",
+        "hidden border border-gray-200 bg-gray-50 text-xs text-gray-700 uppercase sm:table-header-group dark:bg-gray-700 dark:text-gray-400",
         { "sticky top-0": stickyHeader },
         headerClassName,
       )}

@@ -24,11 +24,11 @@ import {
   HomeIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import classNames from "classnames";
 import useSWR from "swr";
 
 import { getProfile } from "@/libs/api/profile";
 import { useCurrencyStore } from "@/store/profile";
-import { classNames } from "@/utils/helper";
 
 const navigation = [
   {
