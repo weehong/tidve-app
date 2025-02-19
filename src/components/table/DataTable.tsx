@@ -21,6 +21,7 @@ import { TableSearch } from "@/components/table/TableSearch";
 import { DataTableProps } from "@/types/table";
 
 export function DataTable<TData>({
+  id,
   columns,
   data,
   isLoading = false,
@@ -38,6 +39,7 @@ export function DataTable<TData>({
   customErrorComponent,
   onRowClick,
   rowClassName,
+  wrapperClassName,
   headerClassName,
   tableClassName,
   modalComponent,
@@ -105,14 +107,12 @@ export function DataTable<TData>({
       {modalComponent}
 
       <div
-        className={classNames(
-          "relative mx-4 min-h-[calc(100vh-20.5rem)] flex-1 sm:mx-6 lg:mx-8",
-          {
-            "overflow-x-auto": !isLoading,
-          },
-        )}
+        className={classNames("relative flex-1", wrapperClassName, {
+          "overflow-x-auto": !isLoading,
+        })}
       >
         <table
+          id={id}
           className={classNames(
             "w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400",
             tableClassName,

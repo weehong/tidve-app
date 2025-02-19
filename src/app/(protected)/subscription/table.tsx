@@ -28,7 +28,6 @@ export default function SubscriptionTable(): React.ReactNode {
     "/api/rate",
     getExchangeRates,
   );
-
   const { data, isLoading, error, mutate } = useSWR<Subscription[]>(
     "/api/subscription",
     getSubscriptions,
@@ -47,91 +46,56 @@ export default function SubscriptionTable(): React.ReactNode {
         ),
       },
       {
-        accessorKey: "startDate",
-        header: "Start Date",
-        enableSorting: true,
-        cell: ({ getValue }) => (
-          <div className="flex justify-between gap-1 sm:table-cell">
-            <span className="text-sm text-gray-500 sm:hidden sm:text-xs">
-              Start Date
-            </span>
-            {new Date(getValue<string>()).toLocaleDateString("en-US", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            })}
-          </div>
-        ),
-      },
-      {
         accessorKey: "endDate",
-        header: "End Date",
+        header: "Next Billing Date",
         enableSorting: true,
         cell: ({ getValue }) => (
           <div className="flex justify-between gap-1 sm:table-cell">
             <span className="text-sm text-gray-500 sm:hidden sm:text-xs">
-              End Date
+              Next Billing Date
             </span>
             {new Date(getValue<string>()).toLocaleDateString("en-US", {
               day: "2-digit",
               month: "short",
               year: "numeric",
             })}
-          </div>
-        ),
-      },
-      {
-        accessorKey: "currency",
-        header: "Price",
-        enableSorting: true,
-        cell: ({ row }) => (
-          <div className="flex justify-between gap-1 sm:table-cell">
-            <span className="text-sm text-gray-500 sm:hidden sm:text-xs">
-              Price
-            </span>
-            <p className="flex flex-row-reverse items-center gap-2 text-sm font-medium sm:flex-row">
-              <span className="text-sm">{row.original.currency}</span>
-              <span className="text-sm">{row.original.price.toFixed(2)}</span>
-            </p>
           </div>
         ),
       },
       {
         accessorKey: "price",
-        header: "Converted Price",
+        header: "Price",
         enableSorting: true,
         cell: ({ row }) => (
-          <div className="flex justify-between gap-1 sm:table-cell">
-            <span className="text-sm text-gray-500 sm:hidden sm:text-xs">
-              Converted Price
-            </span>
-            <p className="flex flex-row-reverse items-center gap-2 text-sm font-medium sm:flex-row">
-              <span className="text-sm">{baseCurrency}</span>
-              <span className="text-sm">
-                {convertBaseCurrency(
-                  row.original.price,
-                  row.original.currency,
-                  baseCurrency || "USD",
-                  rates || [],
-                  {
-                    decimalPlaces: 2,
-                  },
-                ).toFixed(2)}
+          <div className="flex flex-col gap-1 sm:table-cell">
+            <div className="flex justify-between gap-1 sm:block">
+              <span className="text-sm text-gray-500 sm:hidden sm:text-xs">
+                Original Price
               </span>
-            </p>
-          </div>
-        ),
-      },
-      {
-        accessorKey: "cycleInMonths",
-        header: "Billing Cycle",
-        enableSorting: true,
-        cell: ({ getValue }) => (
-          <div className="flex justify-between gap-1 sm:table-cell">
-            <span className="text-sm text-gray-500 sm:hidden sm:text-xs">
-              Billing Cycle
-            </span>
-            <span className="text-sm">{getValue<number>()}</span>
+              <p className="flex flex-row-reverse items-center gap-2 text-sm font-medium sm:flex-row">
+                <span className="text-sm">{row.original.currency}</span>
+                <span className="text-sm">{row.original.price.toFixed(2)}</span>
+              </p>
+            </div>
+            <div className="flex justify-between gap-1 pt-1.5 sm:block sm:pt-0">
+              <span className="text-sm text-gray-500 sm:hidden sm:text-xs">
+                Converted Price
+              </span>
+              <p className="flex flex-row-reverse items-center gap-2 text-sm font-medium sm:flex-row">
+                <span className="text-sm">{baseCurrency}</span>
+                <span className="text-sm">
+                  {convertBaseCurrency(
+                    row.original.price,
+                    row.original.currency,
+                    baseCurrency || "USD",
+                    rates || [],
+                    {
+                      decimalPlaces: 2,
+                    },
+                  ).toFixed(2)}
+                </span>
+              </p>
+            </div>
           </div>
         ),
       },
@@ -140,13 +104,13 @@ export default function SubscriptionTable(): React.ReactNode {
         header: "Actions",
         enableSorting: false,
         cell: ({ row }) => (
-          <div className="flex justify-between gap-2 border-t border-gray-200 pt-2 sm:gap-0 sm:border-t-0 sm:border-none sm:pt-0">
+          <div className="mt-6 flex justify-around gap-2 sm:mt-0 sm:gap-4">
             <button
               onClick={() => {
                 setIsOpen(true);
                 setSelectedSubscription(row.original);
               }}
-              className="cursor-pointer px-3 py-2 text-sm font-semibold text-indigo-600 hover:text-indigo-600 sm:p-0"
+              className="flex-1 cursor-pointer text-sm font-semibold text-indigo-600 hover:text-indigo-600 sm:p-0"
             >
               Edit
             </button>
@@ -155,7 +119,7 @@ export default function SubscriptionTable(): React.ReactNode {
                 setIsConfirmationOpen(true);
                 setSelectedSubscription(row.original);
               }}
-              className="cursor-pointer px-3 py-2 text-sm font-semibold text-red-600 hover:text-red-600 sm:p-0"
+              className="flex-1 cursor-pointer text-sm font-semibold text-red-600 hover:text-red-600 sm:p-0"
             >
               Delete
             </button>
@@ -202,6 +166,7 @@ export default function SubscriptionTable(): React.ReactNode {
         </button>
       </header>
       <DataTable
+        id="subscriptions-table"
         columns={columns}
         data={data || []}
         isLoading={isLoading || isRatesLoading}
@@ -216,6 +181,7 @@ export default function SubscriptionTable(): React.ReactNode {
         enablePagination={true}
         defaultPageSize={10}
         defaultPageIndex={0}
+        wrapperClassName="px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-20.5rem)] pb-8"
         modalComponent={
           <>
             <SubscriptionForm
@@ -225,6 +191,7 @@ export default function SubscriptionTable(): React.ReactNode {
               setSubscription={setSelectedSubscription}
               onCloseAction={() => {
                 setSelectedSubscription(undefined);
+                setIsOpen(false);
               }}
             />
           </>

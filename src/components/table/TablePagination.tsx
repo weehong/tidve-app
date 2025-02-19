@@ -41,16 +41,23 @@ export function TablePagination<TData>({
         >
           <div>
             <p className="text-sm text-gray-700">
-              Page{" "}
+              From{" "}
               <span className="font-medium">
                 {table.getState().pagination.pageIndex * pageSize + 1}
               </span>{" "}
-              with{" "}
+              to{" "}
               <span className="font-medium">
-                {Math.min(
-                  (table.getState().pagination.pageIndex + 1) * pageSize,
-                  data.length,
-                )}
+                {isNaN(
+                  Math.min(
+                    (table.getState().pagination.pageIndex + 1) * pageSize,
+                    data.length,
+                  ),
+                )
+                  ? 0
+                  : Math.min(
+                      (table.getState().pagination.pageIndex + 1) * pageSize,
+                      data.length,
+                    )}
               </span>{" "}
               of{" "}
               <span className="font-medium">
