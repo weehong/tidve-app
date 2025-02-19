@@ -2,6 +2,8 @@
 
 import { useMemo } from "react";
 
+import Link from "next/link";
+
 import { Rate, Subscription } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import moment from "moment";
@@ -197,9 +199,14 @@ export default function Dashboard(): React.ReactNode {
       </div>
 
       <div className="col-span-4">
-        <h2 className="mb-4 text-lg font-bold">
-          Subscriptions Expiring In 30 Days
-        </h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-bold">
+            Subscriptions Expiring In 30 Days
+          </h2>
+          <Link href="/subscription" className="font-bold text-indigo-500">
+            View All
+          </Link>
+        </div>
         <DataTable
           id="dashboard-subscription-table"
           columns={columns}

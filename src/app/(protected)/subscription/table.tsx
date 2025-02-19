@@ -14,6 +14,7 @@ import { deleteSubscription, getSubscriptions } from "@/libs/api/subscription";
 import { convertBaseCurrency } from "@/libs/helper/currency-converter";
 import { useCurrencyStore } from "@/store/profile";
 import { useToastStore } from "@/store/toast";
+import { determineCycleType } from "@/utils/helper";
 
 export default function SubscriptionTable(): React.ReactNode {
   const { setIsOpen: setIsToastOpen, setMessage, setType } = useToastStore();
@@ -49,16 +50,21 @@ export default function SubscriptionTable(): React.ReactNode {
         accessorKey: "endDate",
         header: "Next Billing Date",
         enableSorting: true,
-        cell: ({ getValue }) => (
+        cell: ({ row }) => (
           <div className="flex justify-between gap-1 sm:table-cell">
-            <span className="text-sm text-gray-500 sm:hidden sm:text-xs">
-              Next Billing Date
-            </span>
-            {new Date(getValue<string>()).toLocaleDateString("en-US", {
-              day: "2-digit",
-              month: "short",
-              year: "numeric",
-            })}
+            <p className="text-xs text-gray-500">
+              {determineCycleType(row.original.cycleInMonths)}
+            </p>
+            <div className="flex flex-col gap-1">
+              <span className="text-sm text-gray-500 sm:hidden sm:text-xs">
+                Next Billing Date
+              </span>
+              {new Date(row.original.endDate).toLocaleDateString("en-US", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })}
+            </div>
           </div>
         ),
       },
