@@ -1,14 +1,20 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { PrismaClient } from "@prisma/client";
 
-import { getExternalExchangeRates } from "@/libs/api/rate";
+import { auth0 } from "@/libs/auth/auth0";
 
 const prisma = new PrismaClient();
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const currencies = await getExternalExchangeRates();
+    const session = await auth0.getSession();
+
+    if (!session?.user.sub) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const currencies = await prisma.rate.findMany();
 
     if (!currencies) {
       return NextResponse.json(
@@ -17,15 +23,7 @@ export async function GET(request: Request) {
       );
     }
 
-    for (const [code, rate] of Object.entries(currencies.rates)) {
-      await prisma.rate.upsert({
-        where: { code },
-        update: { rate: parseFloat(rate as string) },
-        create: { code, rate: parseFloat(rate as string) },
-      });
-    }
-
-    return NextResponse.json({ message: "Currency rates updated" });
+    return NextResponse.json(currencies);
   } catch (error) {
     console.error(error);
     return NextResponse.json(

@@ -9,9 +9,9 @@ export function TablePagination<TData>({
   table,
   pageSize,
   data,
-}: TablePaginationProps<TData>) {
+}: TablePaginationProps<TData>): React.ReactNode {
   return (
-    <div className="sticky bottom-0 flex items-center justify-between border-t border-gray-200 bg-white">
+    <div className="flex w-full items-center justify-between border-t border-gray-200 bg-white px-4 sm:px-6 lg:px-8">
       <div className="flex flex-1 justify-between py-4 sm:hidden">
         <button
           onClick={() => table.previousPage()}
@@ -41,16 +41,23 @@ export function TablePagination<TData>({
         >
           <div>
             <p className="text-sm text-gray-700">
-              Showing{" "}
+              From{" "}
               <span className="font-medium">
                 {table.getState().pagination.pageIndex * pageSize + 1}
               </span>{" "}
               to{" "}
               <span className="font-medium">
-                {Math.min(
-                  (table.getState().pagination.pageIndex + 1) * pageSize,
-                  data.length,
-                )}
+                {isNaN(
+                  Math.min(
+                    (table.getState().pagination.pageIndex + 1) * pageSize,
+                    data.length,
+                  ),
+                )
+                  ? 0
+                  : Math.min(
+                      (table.getState().pagination.pageIndex + 1) * pageSize,
+                      data.length,
+                    )}
               </span>{" "}
               of{" "}
               <span className="font-medium">
@@ -61,11 +68,14 @@ export function TablePagination<TData>({
           </div>
           <span className="isolate inline-flex rounded-md shadow-sm">
             <button
-              onClick={() => table.previousPage()}
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                table.previousPage();
+              }}
               disabled={!table.getCanPreviousPage()}
               type="button"
               className={classNames(
-                "relative inline-flex items-center rounded-l-md bg-white px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10",
+                "relative inline-flex items-center rounded-l-md bg-white px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-10",
                 { "opacity-50": !table.getCanPreviousPage() },
               )}
             >
@@ -73,11 +83,14 @@ export function TablePagination<TData>({
               <ChevronLeftIcon aria-hidden="true" className="size-5" />
             </button>
             <button
-              onClick={() => table.nextPage()}
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                table.nextPage();
+              }}
               disabled={!table.getCanNextPage()}
               type="button"
               className={classNames(
-                "relative -ml-px inline-flex items-center rounded-r-md bg-white px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-10",
+                "relative -ml-px inline-flex items-center rounded-r-md bg-white px-2 py-2 text-gray-400 ring-1 ring-gray-300 ring-inset hover:bg-gray-50 focus:z-10",
                 { "opacity-50": !table.getCanNextPage() },
               )}
             >

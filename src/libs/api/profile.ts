@@ -4,6 +4,7 @@ export const getProfile = async (): Promise<Profile> => {
   const res = await fetch("/api/profile");
 
   if (!res.ok) {
+    console.error("Failed to fetch profile");
     throw new Error("Failed to fetch profile");
   }
 
@@ -20,6 +21,7 @@ export const updateBaseCurrency = async (
   });
 
   if (!res.ok) {
+    console.error("Failed to update base currency");
     throw new Error("Failed to update base currency");
   }
 

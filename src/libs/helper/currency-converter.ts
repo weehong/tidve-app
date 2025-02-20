@@ -1,48 +1,36 @@
-import { ExchangeRateProps } from "@/types/exchange-rate";
+import { Rate } from "@prisma/client";
 
 const DECIMAL_PLACES = 2;
 const DEFAULT_BASE = "USD";
 
-export const formatCurrencyAmount = (
-  amount: number,
-  currencyCode: string,
-  locale: string = "en-US",
-): string => {
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: currencyCode,
-    currencyDisplay: "code",
-    minimumFractionDigits: DECIMAL_PLACES,
-    maximumFractionDigits: DECIMAL_PLACES,
-  }).format(amount);
-};
-
-export const dollar = (currency: string = DEFAULT_BASE) =>
+export const dollar = (currency: string = DEFAULT_BASE): Intl.NumberFormat =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: currency,
   });
 
-const validateCurrency = (
-  code: string,
-  rates: ExchangeRateProps[],
-): boolean => {
+const validateCurrency = (code: string, rates: Rate[]): boolean => {
   if (!code || typeof code !== "string") return false;
   const normalizedCode = code.toUpperCase().trim();
   return rates.some((rate) => rate.code === normalizedCode);
+};
+
+const getCurrencyRate = (code: string, rates: Rate[]): number => {
+  const rate = rates.find((rate) => rate.code === code.toUpperCase().trim());
+  return rate?.rate ?? 0;
 };
 
 export const convertBaseCurrency = (
   amount: number,
   fromCurrency: string,
   toCurrency: string,
-  rates: ExchangeRateProps[],
+  rates: Rate[],
   options: {
     decimalPlaces?: number;
-    baseReference?: string;
   } = {},
 ): number => {
   if (!amount || amount <= 0 || !Number.isFinite(amount)) {
+    console.error(`Invalid amount: ${amount}`);
     throw new Error(`Invalid amount: ${amount}`);
   }
 
@@ -50,10 +38,12 @@ export const convertBaseCurrency = (
   const upperToCurrency = toCurrency.toUpperCase().trim();
 
   if (!validateCurrency(upperFromCurrency, rates)) {
+    console.error(`Invalid or unsupported currency: ${fromCurrency}`);
     throw new Error(`Invalid or unsupported currency: ${fromCurrency}`);
   }
 
   if (!validateCurrency(upperToCurrency, rates)) {
+    console.error(`Invalid or unsupported currency: ${toCurrency}`);
     throw new Error(`Invalid or unsupported currency: ${toCurrency}`);
   }
 
@@ -64,17 +54,21 @@ export const convertBaseCurrency = (
   }
 
   try {
-    const fromRate = rates.find((rate) => rate.code === upperFromCurrency);
-    const toRate = rates.find((rate) => rate.code === upperToCurrency);
+    const fromRate = getCurrencyRate(upperFromCurrency, rates);
+    const toRate = getCurrencyRate(upperToCurrency, rates);
 
     if (!fromRate || !toRate) {
+      console.error("Error during currency conversion calculation");
       throw new Error("Error during currency conversion calculation");
     }
 
-    return Number(
-      ((amount / fromRate.rate) * toRate.rate).toFixed(decimalPlaces),
-    );
+    return Number(((amount / fromRate) * toRate).toFixed(decimalPlaces));
   } catch (error) {
+    if (error instanceof Error) {
+      console.error(`Currency conversion failed: ${error.message}`);
+      throw new Error(`Currency conversion failed: ${error.message}`);
+    }
+    console.error("Error during currency conversion calculation");
     throw new Error("Error during currency conversion calculation");
   }
 };

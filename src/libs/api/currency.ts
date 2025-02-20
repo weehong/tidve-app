@@ -1,27 +1,21 @@
-export const getExternalCurrencies = async (): Promise<{
-  currencies: {
-    code: string;
-    name: string;
-  }[];
-}> => {
+import { CurrenciesProps } from "@/types/currency";
+
+export const getExternalCurrencies = async (): Promise<CurrenciesProps> => {
   const res = await fetch("https://api.fxratesapi.com/currencies");
 
   if (!res.ok) {
+    console.error("Failed to fetch currencies");
     throw new Error("Failed to fetch currencies");
   }
 
   return await res.json();
 };
 
-export const getCurrencies = async (): Promise<{
-  currencies: {
-    code: string;
-    name: string;
-  }[];
-}> => {
+export const getCurrencies = async (): Promise<CurrenciesProps> => {
   const res = await fetch("/api/currency");
 
   if (!res.ok) {
+    console.error("Failed to fetch currencies");
     throw new Error("Failed to fetch currencies");
   }
 

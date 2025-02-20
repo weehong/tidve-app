@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 import { PrismaClient } from "@prisma/client";
 
@@ -6,17 +6,20 @@ import { auth0 } from "@/libs/auth/auth0";
 
 const prisma = new PrismaClient();
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await auth0.getSession();
+    const id = request.nextUrl.searchParams.get("id");
 
-    if (!session?.user?.sub) {
+    if (!session?.user?.sub && !id) {
       return NextResponse.json({ error: "No session found" }, { status: 401 });
     }
 
+    const userId = session?.user?.sub || id;
+
     const profile = await prisma.profile.findUnique({
       where: {
-        userId: session.user.sub,
+        userId: userId!,
       },
     });
 
@@ -30,7 +33,7 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await auth0.getSession();
     const body = await request.json();

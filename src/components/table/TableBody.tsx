@@ -15,7 +15,7 @@ export function TableBody<TData>({
   customErrorComponent,
   onRowClick,
   rowClassName,
-}: TableBodyProps<TData>) {
+}: TableBodyProps<TData>): React.ReactNode {
   const getRowClassName = (row: TData) => {
     if (typeof rowClassName === "function") {
       return rowClassName(row);
@@ -25,10 +25,22 @@ export function TableBody<TData>({
 
   if (isLoading) {
     return (
-      <tr className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+      <tr className="flex justify-center bg-white sm:table-row dark:border-gray-700 dark:bg-gray-800">
+        <td colSpan={table.getAllColumns().length}>
+          <div className="flex h-full w-screen items-center justify-center py-8">
+            {customLoadingComponent || <Spinner />}
+          </div>
+        </td>
+      </tr>
+    );
+  }
+
+  if (table.getRowModel().rows.length === 0) {
+    return (
+      <tr className="flex justify-center bg-white sm:table-row dark:border-gray-700 dark:bg-gray-800">
         <td colSpan={table.getAllColumns().length}>
           <div className="flex h-full w-full items-center justify-center py-8">
-            {customLoadingComponent || <Spinner />}
+            No Subscription
           </div>
         </td>
       </tr>
@@ -37,7 +49,7 @@ export function TableBody<TData>({
 
   if (error) {
     return (
-      <tr className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+      <tr className="bg-white dark:border-gray-700 dark:bg-gray-800">
         <td colSpan={table.getAllColumns().length}>
           <div className="flex h-full w-full flex-col items-center justify-center gap-4 py-8">
             {customErrorComponent || (
@@ -65,7 +77,7 @@ export function TableBody<TData>({
         <tr
           key={row.id}
           className={classNames(
-            "border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800",
+            "flex flex-col rounded-md border border-gray-200 bg-white px-5 py-5 sm:table-row sm:p-0 dark:border-gray-700 dark:bg-gray-800",
             getRowClassName(row.original),
             { "cursor-pointer hover:bg-gray-50": onRowClick },
           )}
@@ -74,7 +86,7 @@ export function TableBody<TData>({
           {row.getVisibleCells().map((cell) => (
             <td
               key={cell.id}
-              className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white"
+              className="py-1.5 align-top font-medium text-gray-900 sm:px-3 dark:text-white"
             >
               {flexRender(cell.column.columnDef.cell, cell.getContext())}
             </td>
