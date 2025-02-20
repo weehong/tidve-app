@@ -198,7 +198,10 @@ export default function Dashboard(): React.ReactNode {
           <h2 className="text-lg font-bold">
             Subscriptions Expiring In 30 Days
           </h2>
-          <Link href="/subscription" className="font-bold text-indigo-500">
+          <Link
+            href="/subscription"
+            className="text-sm font-bold text-indigo-500"
+          >
             View All
           </Link>
         </div>

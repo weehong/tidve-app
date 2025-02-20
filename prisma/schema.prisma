@@ -10,6 +10,7 @@ datasource db {
 model Profile {
   id        Int      @id @default(autoincrement())
   userId    String   @unique @map("user_id")
+  name      String   @map("name")
   email     String   @unique @map("email")
   isInitial Boolean  @default(true) @map("is_initial")
   currency  String   @map("currency")

@@ -8,9 +8,10 @@ This helps users understand their expenses better and make informed decisions ab
 
 ## Features
 
-- [ ] Login with Auth0
-- [ ] Dashboard
-- [ ] Subscription Management
+- [x] Login with Auth0
+- [x] Dashboard
+- [x] Subscription Management
+- [ ] Installment Management
 
 ## Tech Stack
 

@@ -47,10 +47,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       update: {
         isInitial: body.isInitial,
         currency: body.currency,
+        name: body.name,
       },
       create: {
         userId: session?.user.sub!,
         email: session?.user.email!,
+        name: session?.user.name!,
         isInitial: body.isInitial,
         currency: body.currency,
       },
