@@ -22,6 +22,7 @@ CREATE TABLE "subscriptions" (
     "start_date" TIMESTAMP(3) NOT NULL,
     "end_date" TIMESTAMP(3) NOT NULL,
     "cycle_in_months" INTEGER NOT NULL,
+    "url" TEXT,
     "number_email_sent" INTEGER NOT NULL DEFAULT 0,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

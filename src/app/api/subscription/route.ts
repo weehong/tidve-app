@@ -4,7 +4,9 @@ import { PrismaClient } from "@prisma/client";
 
 import { auth0 } from "@/libs/auth/auth0";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  log: ["query", "info", "warn", "error"],
+});
 
 export async function GET(): Promise<NextResponse> {
   try {
@@ -27,6 +29,7 @@ export async function GET(): Promise<NextResponse> {
         cycleInMonths: true,
         startDate: true,
         endDate: true,
+        url: true,
       },
     });
 
@@ -48,7 +51,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, currency, price, cycle, start_date, end_date } =
+    const { name, currency, price, cycle, start_date, end_date, url } =
       await request.json();
 
     const subscription = await prisma.subscription.create({
@@ -60,6 +63,7 @@ export async function POST(request: NextRequest) {
         cycleInMonths: cycle,
         startDate: new Date(start_date),
         endDate: new Date(end_date),
+        url,
       },
       select: {
         id: true,
@@ -69,6 +73,7 @@ export async function POST(request: NextRequest) {
         cycleInMonths: true,
         startDate: true,
         endDate: true,
+        url: true,
       },
     });
 
