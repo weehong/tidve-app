@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { faGithub } from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Disclosure } from "@headlessui/react";
 
 import { auth0 } from "@/libs/auth/auth0";
@@ -30,7 +32,7 @@ export default async function Navbar(): Promise<React.ReactNode> {
               />
             </div>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center gap-x-5">
             {session ? (
               <div className="flex items-center gap-x-5">
                 <Link
@@ -54,6 +56,13 @@ export default async function Navbar(): Promise<React.ReactNode> {
                 Login
               </a>
             )}
+            <a
+              href="https://github.com/weehong/tidve-app"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <FontAwesomeIcon icon={faGithub} className="size-6" />
+            </a>
           </div>
         </div>
       </div>
