@@ -10,11 +10,20 @@ export function TablePagination<TData>({
   pageSize,
   data,
 }: TablePaginationProps<TData>): React.ReactNode {
+  const backToTop = () => {
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 100);
+  };
+
   return (
     <div className="flex w-full items-center justify-between border-t border-gray-200 bg-white px-4 sm:px-6 lg:px-8">
       <div className="flex flex-1 justify-between py-4 sm:hidden">
         <button
-          onClick={() => table.previousPage()}
+          onClick={() => {
+            backToTop();
+            table.previousPage();
+          }}
           disabled={!table.getCanPreviousPage()}
           className={classNames(
             "relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50",
@@ -24,7 +33,10 @@ export function TablePagination<TData>({
           Previous
         </button>
         <button
-          onClick={() => table.nextPage()}
+          onClick={() => {
+            backToTop();
+            table.nextPage();
+          }}
           disabled={!table.getCanNextPage()}
           className={classNames(
             "relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50",
@@ -69,7 +81,7 @@ export function TablePagination<TData>({
           <span className="isolate inline-flex rounded-md shadow-sm">
             <button
               onClick={() => {
-                window.scrollTo({ top: 0, behavior: "smooth" });
+                backToTop();
                 table.previousPage();
               }}
               disabled={!table.getCanPreviousPage()}
@@ -84,7 +96,7 @@ export function TablePagination<TData>({
             </button>
             <button
               onClick={() => {
-                window.scrollTo({ top: 0, behavior: "smooth" });
+                backToTop();
                 table.nextPage();
               }}
               disabled={!table.getCanNextPage()}

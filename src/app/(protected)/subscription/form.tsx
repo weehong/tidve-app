@@ -134,6 +134,7 @@ export default function SubscriptionForm({
           endDate: new Date(data.end_date),
           cycleInMonths: data.cycle,
           currency: data.currency.value,
+          numberEmailSent: 0,
         });
       } else {
         res = await createSubscription({
@@ -142,6 +143,7 @@ export default function SubscriptionForm({
           endDate: new Date(data.end_date),
           cycleInMonths: data.cycle,
           currency: data.currency.value,
+          numberEmailSent: 0,
         });
       }
 

@@ -2,6 +2,7 @@
 CREATE TABLE "profiles" (
     "id" SERIAL NOT NULL,
     "user_id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "is_initial" BOOLEAN NOT NULL DEFAULT true,
     "currency" TEXT NOT NULL,
@@ -21,6 +22,7 @@ CREATE TABLE "subscriptions" (
     "start_date" TIMESTAMP(3) NOT NULL,
     "end_date" TIMESTAMP(3) NOT NULL,
     "cycle_in_months" INTEGER NOT NULL,
+    "number_email_sent" INTEGER NOT NULL DEFAULT 0,
     "is_active" BOOLEAN NOT NULL DEFAULT true,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -62,3 +64,6 @@ CREATE UNIQUE INDEX "rates_code_key" ON "rates"("code");
 
 -- CreateIndex
 CREATE INDEX "rates_code_idx" ON "rates"("code");
+
+-- AddForeignKey
+ALTER TABLE "subscriptions" ADD CONSTRAINT "subscriptions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "profiles"("user_id") ON DELETE RESTRICT ON UPDATE CASCADE;

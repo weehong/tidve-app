@@ -47,7 +47,7 @@ export async function PUT(
     const id = (await params).id;
 
     const subscription = await prisma.subscription.findUnique({
-      where: { id: Number(id) },
+      where: { id: Number(id), isActive: true },
     });
 
     if (!subscription) {
@@ -77,7 +77,18 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json(subscription);
+    return NextResponse.json({
+      id: subscription.id,
+      name: subscription.name,
+      currency: subscription.currency,
+      price: subscription.price,
+      cycleInMonths: subscription.cycleInMonths,
+      startDate: subscription.startDate,
+      endDate: subscription.endDate,
+      isActive: subscription.isActive,
+      createdAt: subscription.createdAt,
+      updatedAt: subscription.updatedAt,
+    });
   } catch (error) {
     console.error("Error fetching subscription", error);
     return NextResponse.json(

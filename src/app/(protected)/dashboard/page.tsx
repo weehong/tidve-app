@@ -77,7 +77,11 @@ export default function Dashboard(): React.ReactNode {
     const today = moment().startOf("day");
     const thirtyDaysFromNow = moment().add(30, "days").endOf("day");
 
-    return subscriptions.filter((subscription) => {
+    const sortedSubscriptions = subscriptions.sort((a, b) => {
+      return moment(a.endDate).diff(moment(b.endDate));
+    });
+
+    return sortedSubscriptions.filter((subscription) => {
       const endDate = moment(subscription.endDate);
       return endDate.isBetween(today, thirtyDaysFromNow, "day", "[)");
     });
@@ -161,7 +165,7 @@ export default function Dashboard(): React.ReactNode {
 
   return (
     <div className="grid grid-cols-2 gap-6 px-4 py-10 sm:grid-cols-4 sm:px-6 lg:grid-cols-3 lg:px-8 xl:grid-cols-4">
-      <div className="block rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+      <div className="col-span-4 block rounded-lg border border-gray-200 bg-white p-6 shadow-sm sm:col-span-2 md:col-span-1 dark:border-gray-700 dark:bg-gray-800">
         <h5 className="font-roobert mb-2 text-sm font-bold tracking-widest text-gray-500 uppercase dark:text-white">
           {subscriptions?.length} Subscription
         </h5>
@@ -196,9 +200,12 @@ export default function Dashboard(): React.ReactNode {
       <div className="col-span-4 mt-6">
         <div className="mb-4 flex flex-col justify-start gap-2 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-lg font-bold">
-            Subscriptions Expiring In 30 Days
+            Upcoming Subscription Renewal in 30 Days
           </h2>
-          <Link href="/subscription" className="font-bold text-indigo-500">
+          <Link
+            href="/subscription"
+            className="text-sm font-bold text-indigo-500"
+          >
             View All
           </Link>
         </div>

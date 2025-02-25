@@ -10,3 +10,8 @@
 body {
   @apply font-bricolage;
 }
+
+button,
+a {
+  @apply cursor-pointer;
+}

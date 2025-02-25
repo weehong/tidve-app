@@ -17,6 +17,16 @@ export async function GET(): Promise<NextResponse> {
     const subscriptions = await prisma.subscription.findMany({
       where: {
         userId: session.user.sub,
+        isActive: true,
+      },
+      select: {
+        id: true,
+        name: true,
+        currency: true,
+        price: true,
+        cycleInMonths: true,
+        startDate: true,
+        endDate: true,
       },
     });
 
@@ -50,6 +60,15 @@ export async function POST(request: NextRequest) {
         cycleInMonths: cycle,
         startDate: new Date(start_date),
         endDate: new Date(end_date),
+      },
+      select: {
+        id: true,
+        name: true,
+        currency: true,
+        price: true,
+        cycleInMonths: true,
+        startDate: true,
+        endDate: true,
       },
     });
 
