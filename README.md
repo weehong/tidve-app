@@ -29,10 +29,13 @@ This helps users understand their expenses better and make informed decisions ab
 - [PostgreSQL](https://postgresql.org)
 - [Vercel](https://vercel.com)
 - [Resend](https://resend.com)
+
 ## How to Use
 
 1. Clone the repository.
 2. Run `npm install` to install the dependencies.
 3. Copy `.env.example` to `.env` and fill in the values.
-4. Run `npm run dev` to start the development server.
-5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the result.
+4. Run `npx prisma generate` to generate the Prisma client.
+5. Run `npx prisma migrate dev` to migrate the database.
+6. Run `npm run dev` to start the development server.
+7. Open [http://localhost:3000](http://localhost:3000) in your browser to see the result.

@@ -25,6 +25,7 @@ export const SubscriptionFormSchema = z.object({
   cycle: z.coerce
     .number()
     .min(1, { message: "Cycle must be at least 1 month" }),
+  url: z.string().url().optional(),
   start_date: z
     .string()
     .min(1, { message: "Start date is required" })

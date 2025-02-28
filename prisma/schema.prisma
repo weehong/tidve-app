@@ -32,6 +32,7 @@ model Subscription {
   startDate       DateTime @map("start_date")
   endDate         DateTime @map("end_date")
   cycleInMonths   Int      @map("cycle_in_months")
+  url             String?  @map("url")
   numberEmailSent Int      @default(0) @map("number_email_sent")
   isActive        Boolean  @default(true) @map("is_active")
   createdAt       DateTime @default(now()) @map("created_at")

@@ -42,6 +42,7 @@ const INITIAL_FORM_VALUES: SubscriptionFormValues = {
   cycle: 1,
   start_date: new Date().toISOString().split("T")[0],
   end_date: new Date().toISOString().split("T")[0],
+  url: "",
 } as const;
 
 export default function SubscriptionForm({
@@ -135,6 +136,7 @@ export default function SubscriptionForm({
           cycleInMonths: data.cycle,
           currency: data.currency.value,
           numberEmailSent: 0,
+          url: data.url || null,
         });
       } else {
         res = await createSubscription({
@@ -144,6 +146,7 @@ export default function SubscriptionForm({
           cycleInMonths: data.cycle,
           currency: data.currency.value,
           numberEmailSent: 0,
+          url: data.url || null,
         });
       }
 
@@ -254,6 +257,18 @@ export default function SubscriptionForm({
               register={register}
               readOnly
               disabled
+            />
+          </div>
+
+          <div className="col-span-9">
+            <InputField
+              type="url"
+              id="url"
+              label="Website"
+              name="url"
+              register={register}
+              error={!!errors.url}
+              helperText={errors.url?.message}
             />
           </div>
         </div>

@@ -61,7 +61,7 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, currency, price, cycle, start_date, end_date } =
+    const { name, currency, price, cycle, start_date, end_date, url } =
       await request.json();
 
     await prisma.subscription.update({
@@ -73,6 +73,7 @@ export async function PUT(
         cycleInMonths: cycle,
         startDate: new Date(start_date),
         endDate: new Date(end_date),
+        url,
         isActive: true,
       },
     });
@@ -85,6 +86,7 @@ export async function PUT(
       cycleInMonths: subscription.cycleInMonths,
       startDate: subscription.startDate,
       endDate: subscription.endDate,
+      url: subscription.url,
       isActive: subscription.isActive,
       createdAt: subscription.createdAt,
       updatedAt: subscription.updatedAt,

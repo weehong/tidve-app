@@ -2,8 +2,10 @@
 
 import { useMemo, useState } from "react";
 
+import { LinkIcon } from "@heroicons/react/24/outline";
 import { Rate, Subscription } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
+import classNames from "classnames";
 import useSWR from "swr";
 
 import SubscriptionForm from "@/app/(protected)/subscription/form";
@@ -40,9 +42,23 @@ export default function SubscriptionTable(): React.ReactNode {
         accessorKey: "name",
         header: "Name",
         enableSorting: true,
-        cell: ({ getValue }) => (
+        cell: ({ row }) => (
           <div className="flex items-center gap-2 sm:table-cell">
-            <span>{getValue<string>()}</span>
+            {row.original.url ? (
+              <a
+                href={row.original.url || ""}
+                target="_blank"
+                className={classNames(
+                  "flex items-center gap-2 text-indigo-600 hover:text-indigo-600",
+                  !row.original.url && "text-gray-500",
+                )}
+              >
+                <span>{row.original.name}</span>
+                <LinkIcon className="h-3 w-3" />
+              </a>
+            ) : (
+              <span>{row.original.name}</span>
+            )}
           </div>
         ),
       },
@@ -146,6 +162,11 @@ export default function SubscriptionTable(): React.ReactNode {
     }
   };
 
+  const sortByNextBillingDate = (data: Subscription[]) =>
+    data.sort(
+      (a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
+    );
+
   return (
     <div className="flex flex-col gap-6">
       <ActionDialog
@@ -172,7 +193,7 @@ export default function SubscriptionTable(): React.ReactNode {
       <DataTable
         id="subscriptions-table"
         columns={columns}
-        data={data || []}
+        data={sortByNextBillingDate(data || [])}
         isLoading={isLoading || isRatesLoading}
         error={error}
         onRefresh={mutate}
