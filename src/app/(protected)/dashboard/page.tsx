@@ -127,12 +127,12 @@ export default function Dashboard(): React.ReactNode {
           const convertedPrice =
             rates && profile?.currency
               ? convertBaseCurrency(
-                  row.original.price,
-                  row.original.currency,
-                  profile.currency,
-                  rates,
-                  { decimalPlaces: 2 },
-                )
+                row.original.price,
+                row.original.currency,
+                profile.currency,
+                rates,
+                { decimalPlaces: 2 },
+              )
               : 0;
 
           return (

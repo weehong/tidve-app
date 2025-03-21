@@ -17,6 +17,7 @@ import { convertBaseCurrency } from "@/libs/helper/currency-converter";
 import { useCurrencyStore } from "@/store/profile";
 import { useToastStore } from "@/store/toast";
 import { determineCycleType } from "@/utils/helper";
+import moment from "moment";
 
 export default function SubscriptionTable(): React.ReactNode {
   const { setIsOpen: setIsToastOpen, setMessage, setType } = useToastStore();
@@ -74,11 +75,7 @@ export default function SubscriptionTable(): React.ReactNode {
                 {determineCycleType(row.original.cycleInMonths)}
               </p>
               <p className="text-right sm:text-left">
-                {new Date(row.original.endDate).toLocaleDateString("en-US", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                })}
+                {moment(row.original.endDate).add(row.original.cycleInMonths, "month").format("MMM DD, YYYY")}
               </p>
             </div>
           </div>

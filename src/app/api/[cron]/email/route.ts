@@ -56,8 +56,14 @@ export async function GET(request: NextRequest) {
       where: {
         isActive: true,
         OR: [
-          { endDate: { lt: sevenDaysLater }, numberEmailSent: { not: 1 } },
-          { endDate: { lt: threeDaysLater }, numberEmailSent: { not: 2 } },
+          {
+            endDate: { lt: sevenDaysLater },
+            numberEmailSent: 0
+          },
+          {
+            endDate: { lt: threeDaysLater },
+            numberEmailSent: 1
+          },
         ],
       },
       include: {
