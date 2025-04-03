@@ -75,7 +75,7 @@ export default function SubscriptionTable(): React.ReactNode {
                 {determineCycleType(row.original.cycleInMonths)}
               </p>
               <p className="text-right sm:text-left">
-                {moment(row.original.endDate).add(row.original.cycleInMonths, "month").format("MMM DD, YYYY")}
+                {moment(row.original.endDate).format("MMM DD, YYYY")}
               </p>
             </div>
           </div>

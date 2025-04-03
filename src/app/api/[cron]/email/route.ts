@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import { Resend } from "resend";
 
 import SubscriptionRenewal from "@/emails/SubscriptionRenewal";
+import { isVercelCron } from "@/libs/helper/check-cron-header";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
@@ -29,13 +30,6 @@ type EmailProcessResult = {
   error?: string;
 };
 
-function isVercelCron(request: NextRequest): boolean {
-  const cronSecret = request.headers.get("x-vercel-cron-secret");
-  const validSecret = process.env.CRON_SECRET;
-
-  return Boolean(cronSecret && validSecret && cronSecret === validSecret);
-}
-
 export async function GET(request: NextRequest) {
   if (!isVercelCron(request)) {
     console.error("[Subscription Reminder] Unauthorized access attempt");
@@ -58,11 +52,11 @@ export async function GET(request: NextRequest) {
         OR: [
           {
             endDate: { lt: sevenDaysLater },
-            numberEmailSent: 0
+            numberEmailSent: 0,
           },
           {
             endDate: { lt: threeDaysLater },
-            numberEmailSent: 1
+            numberEmailSent: 1,
           },
         ],
       },

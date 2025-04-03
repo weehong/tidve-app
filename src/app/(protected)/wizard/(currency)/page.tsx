@@ -15,18 +15,10 @@ import { updateBaseCurrency } from "@/libs/api/profile";
 import { renderCurrencyOption } from "@/utils/helper";
 
 const zodSchema = z.object({
-  baseCurrency: z
-    .union([
-      z.object({
-        value: z.string(),
-        label: z.string(),
-      }),
-      z.null(),
-      z.undefined(),
-    ])
-    .refine((val) => val !== null && val !== undefined, {
-      message: "Please select a base currency",
-    }),
+  baseCurrency: z.object({
+    value: z.string(),
+    label: z.string(),
+  }),
 });
 
 type FormValues = {
