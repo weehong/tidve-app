@@ -42,7 +42,7 @@ const INITIAL_FORM_VALUES: SubscriptionFormValues = {
   cycle: 1,
   start_date: new Date().toISOString().split("T")[0],
   end_date: new Date().toISOString().split("T")[0],
-  url: "",
+  url: undefined,
 } as const;
 
 export default function SubscriptionForm({
@@ -269,6 +269,7 @@ export default function SubscriptionForm({
               register={register}
               error={!!errors.url}
               helperText={errors.url?.message}
+              placeholder="https://www.example.com"
             />
           </div>
         </div>
