@@ -1,3 +1,10 @@
+import { Subscription } from "@prisma/client";
+
+export type PaginatedResponse = {
+  data: Subscription[];
+  hasMore: boolean;
+};
+
 export type SubscriptionProps = {
   id: number;
   userId: string;

@@ -1,7 +1,11 @@
+import { PaginatedResponse } from "@/types/subscription";
 import { Subscription } from "@prisma/client";
 
-export const getSubscriptions = async (): Promise<Subscription[]> => {
-  const response = await fetch("/api/subscription");
+export const getSubscriptions = async (
+  page: number = 1,
+  pageSize: number = 10
+): Promise<PaginatedResponse> => {
+  const response = await fetch(`/api/subscription?page=${page}&pageSize=${pageSize}`);
 
   if (!response.ok) {
     console.error("Failed to fetch subscriptions");

@@ -1,39 +1,32 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
+import { useEffect, useRef, useState } from "react";
 import {
-  PaginationState,
   SortingState,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import classNames from "classnames";
-
 import { TableBody } from "@/components/table/TableBody";
 import { fuzzyFilter } from "@/components/table/TableFilter";
 import { TableHeader } from "@/components/table/TableHeader";
-import { TablePagination } from "@/components/table/TablePagination";
 import { TableSearch } from "@/components/table/TableSearch";
 import { DataTableProps } from "@/types/table";
+import Spinner from "@/components/spinner/Spinner";
 
 export function DataTable<TData>({
   id,
   columns,
   data,
   isLoading = false,
+  isLoadingMore = false,
   error = null,
   onRefresh,
   searchPlaceholder = "Search all columns...",
   enableSorting = true,
   enableGlobalFilter = true,
-  enableColumnFilters = false,
-  enablePagination = false,
-  defaultPageSize = 20,
-  defaultPageIndex = 0,
   stickyHeader = false,
   customLoadingComponent,
   customErrorComponent,
@@ -43,54 +36,49 @@ export function DataTable<TData>({
   headerClassName,
   tableClassName,
   modalComponent,
+  onLoadMore,
+  hasMore = false,
 }: DataTableProps<TData>): React.ReactNode {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = useState("");
-  const [{ pageIndex, pageSize }, setPagination] = useState<PaginationState>({
-    pageIndex: defaultPageIndex,
-    pageSize: defaultPageSize,
-  });
-
-  useEffect(() => {
-    if (enableGlobalFilter) {
-      setPagination((prev) => ({ ...prev, pageIndex: 0 }));
-    }
-  }, [globalFilter, enableGlobalFilter]);
-
-  const processedColumns = columns.map((column) => ({
-    ...column,
-    enableSorting: enableSorting && column.enableSorting !== false,
-    enableFiltering: enableGlobalFilter && column.enableGlobalFilter !== false,
-  }));
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   const table = useReactTable({
-    columns: processedColumns,
+    columns,
     data,
     state: {
       sorting,
       globalFilter: enableGlobalFilter ? globalFilter : "",
-      pagination: enablePagination ? { pageIndex, pageSize } : undefined,
     },
     filterFns: {
       fuzzy: fuzzyFilter,
     },
     onSortingChange: setSorting,
-    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel:
-      enableGlobalFilter || enableColumnFilters
-        ? getFilteredRowModel()
-        : undefined,
+    getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: enableSorting ? getSortedRowModel() : undefined,
-    getPaginationRowModel: enablePagination
-      ? getPaginationRowModel()
-      : undefined,
     onGlobalFilterChange: setGlobalFilter,
     enableSorting,
     enableGlobalFilter,
-    enableColumnFilters,
-    manualPagination: false,
   });
+
+  useEffect(() => {
+    const currentRef = wrapperRef.current;
+    const handleScroll = () => {
+      if (!currentRef || !onLoadMore || !hasMore || isLoading || isLoadingMore) return;
+
+      const buffer = 200;
+      const { scrollTop, scrollHeight, clientHeight } = currentRef;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < buffer;
+
+      if (isNearBottom) {
+        onLoadMore();
+      }
+    };
+
+    currentRef?.addEventListener('scroll', handleScroll);
+    return () => currentRef?.removeEventListener('scroll', handleScroll);
+  }, [onLoadMore, hasMore, isLoading, isLoadingMore]);
 
   return (
     <div className="flex h-full flex-col gap-6">
@@ -107,15 +95,16 @@ export function DataTable<TData>({
       {modalComponent}
 
       <div
-        className={classNames("relative flex-1", wrapperClassName, {
+        ref={wrapperRef}
+        className={classNames("relative flex-1 overflow-y-auto", wrapperClassName, {
           "overflow-x-auto": !isLoading,
         })}
       >
         <table
           id={id}
           className={classNames(
-            "w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400",
-            tableClassName,
+            "w-full text-left text-sm text-gray-500 rtl:text-right",
+            tableClassName
           )}
         >
           <TableHeader
@@ -127,6 +116,7 @@ export function DataTable<TData>({
             <TableBody
               table={table}
               isLoading={isLoading}
+              isLoadingMore={isLoadingMore}
               error={error}
               onRefresh={onRefresh}
               customLoadingComponent={customLoadingComponent}
@@ -134,13 +124,31 @@ export function DataTable<TData>({
               onRowClick={onRowClick}
               rowClassName={rowClassName}
             />
+
+            {hasMore && (
+              <tr>
+                <td colSpan={columns.length} className="text-center py-4">
+                  <div className="flex justify-center items-center gap-2">
+                    {isLoadingMore ? (
+                      <>
+                        <Spinner className="h-5 w-5 text-gray-500 animate-spin" />
+                        <span>Loading more subscriptions...</span>
+                      </>
+                    ) : (
+                      <button
+                        onClick={onLoadMore}
+                        className="text-indigo-600 hover:text-indigo-900 font-medium"
+                      >
+                        Load More
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>
-
-      {enablePagination && (
-        <TablePagination table={table} pageSize={pageSize} data={data} />
-      )}
     </div>
   );
 }

@@ -23,6 +23,9 @@ export type DataTableProps<TData> = {
   headerClassName?: string;
   tableClassName?: string;
   modalComponent?: React.ReactNode;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
+  isLoadingMore?: boolean;
 };
 
 export type TableSearchProps = {
@@ -46,6 +49,7 @@ export type TableBodyProps<TData> = {
   customErrorComponent?: React.ReactNode;
   onRowClick?: (row: TData) => void;
   rowClassName?: string | ((row: TData) => string);
+  isLoadingMore?: boolean;
 };
 
 export type TablePaginationProps<TData> = {

@@ -54,11 +54,11 @@ export default function Dashboard(): React.ReactNode {
   const { data: rates } = useSWR<Rate[]>("/api/rate", getExchangeRates);
 
   const total = useMemo(() => {
-    if (!subscriptions?.length || !rates?.length || !profile?.currency) {
+    if (!subscriptions?.data?.length || !rates?.length || !profile?.currency) {
       return 0;
     }
 
-    return subscriptions.reduce(
+    return subscriptions.data.reduce(
       (acc, subscription) =>
         acc +
         convertBaseCurrency(
@@ -72,12 +72,12 @@ export default function Dashboard(): React.ReactNode {
   }, [subscriptions, rates, profile?.currency]);
 
   const expiringSubscriptions = useMemo(() => {
-    if (!subscriptions?.length) return [];
+    if (!subscriptions?.data?.length) return [];
 
     const today = moment().startOf("day");
     const thirtyDaysFromNow = moment().add(30, "days").endOf("day");
 
-    const sortedSubscriptions = subscriptions.sort((a, b) => {
+    const sortedSubscriptions = subscriptions.data.sort((a, b) => {
       return moment(a.endDate).diff(moment(b.endDate));
     });
 
@@ -167,7 +167,7 @@ export default function Dashboard(): React.ReactNode {
     <div className="grid grid-cols-2 gap-6 px-4 py-10 sm:grid-cols-4 sm:px-6 lg:grid-cols-3 lg:px-8 xl:grid-cols-4">
       <div className="col-span-4 block rounded-lg border border-gray-200 bg-white p-6 shadow-sm sm:col-span-2 md:col-span-1 dark:border-gray-700 dark:bg-gray-800">
         <h5 className="font-roobert mb-2 text-sm font-bold tracking-widest text-gray-500 uppercase dark:text-white">
-          {subscriptions?.length} Subscription
+          {subscriptions?.data?.length} Subscription
         </h5>
 
         {isSubscriptionsLoading ? (

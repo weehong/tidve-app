@@ -112,12 +112,10 @@ export async function GET(request: NextRequest) {
         { username, subscriptions },
       ]): Promise<EmailProcessResult> => {
         try {
-          // Get the minimum number of emails sent for the user's subscriptions
           const minEmailsSent = Math.min(
             ...subscriptions.map((sub) => sub.numberEmailSent),
           );
 
-          // Determine expiresIn based on the number of emails already sent
           const expiresIn =
             minEmailsSent === 0
               ? REMINDER_PERIODS.FIRST_REMINDER

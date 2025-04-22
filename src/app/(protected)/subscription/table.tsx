@@ -1,40 +1,83 @@
 "use client";
 
 import { useMemo, useState } from "react";
-
 import { LinkIcon } from "@heroicons/react/24/outline";
 import { Rate, Subscription } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import classNames from "classnames";
-import useSWR from "swr";
-
+import useSWRInfinite from "swr/infinite";
 import SubscriptionForm from "@/app/(protected)/subscription/form";
 import ActionDialog from "@/components/modal/ActionDialog";
 import { DataTable } from "@/components/table/DataTable";
 import { getExchangeRates } from "@/libs/api/rate";
-import { deleteSubscription, getSubscriptions } from "@/libs/api/subscription";
+import { deleteSubscription } from "@/libs/api/subscription";
 import { convertBaseCurrency } from "@/libs/helper/currency-converter";
 import { useCurrencyStore } from "@/store/profile";
 import { useToastStore } from "@/store/toast";
 import { determineCycleType } from "@/utils/helper";
 import moment from "moment";
+import { PaginatedResponse } from "@/types/subscription";
 
 export default function SubscriptionTable(): React.ReactNode {
   const { setIsOpen: setIsToastOpen, setMessage, setType } = useToastStore();
   const baseCurrency = useCurrencyStore((state) => state.baseCurrency);
   const [isOpen, setIsOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
-  const [selectedSubscription, setSelectedSubscription] = useState<
-    Subscription | undefined
-  >(undefined);
+  const [selectedSubscription, setSelectedSubscription] = useState<Subscription | undefined>(undefined);
 
-  const { data: rates, isLoading: isRatesLoading } = useSWR<Rate[]>(
-    "/api/rate",
-    getExchangeRates,
+  const PAGE_SIZE = 10;
+  const getKey = (pageIndex: number, previousPageData: any) => {
+    if (previousPageData && !previousPageData.hasMore) return null;
+    return `/api/subscription?page=${pageIndex + 1}&pageSize=${PAGE_SIZE}`;
+  };
+
+  const { data: pages, error, isLoading, isValidating, size, setSize, mutate } = useSWRInfinite(
+    getKey,
+    async (url: string) => {
+      const res = await fetch(url);
+      return res.json();
+    }
   );
-  const { data, isLoading, error, mutate } = useSWR<Subscription[]>(
-    "/api/subscription",
-    getSubscriptions,
+
+  const { data: ratePages } = useSWRInfinite(
+    () => "/api/rate",
+    getExchangeRates
+  );
+  const rates = ratePages?.[0] || [];
+
+  const flattenedData = useMemo(() =>
+    pages?.flatMap(page => page?.data || []).filter(Boolean) || [],
+    [pages]
+  );
+
+  const hasMore = useMemo(() => {
+    const lastPage = pages?.[pages.length - 1];
+    return lastPage?.hasMore ?? false;
+  }, [pages]);
+
+  const handleLoadMore = () => {
+    if (hasMore && !isValidating) {
+      setSize(size + 1);
+    }
+  };
+
+  const handleDeleteSubscription = async () => {
+    if (selectedSubscription?.id) {
+      await deleteSubscription(selectedSubscription.id);
+      setSelectedSubscription(undefined);
+      setIsConfirmationOpen(false);
+      setIsToastOpen(true);
+      setMessage("The subscription has been deleted successfully.");
+      setType("success");
+      mutate();
+    }
+  };
+
+  const sortedData = useMemo(
+    () => [...flattenedData].sort((a, b) =>
+      new Date(a.endDate).getTime() - new Date(b.endDate).getTime()
+    ),
+    [flattenedData]
   );
 
   const columns = useMemo<ColumnDef<Subscription>[]>(
@@ -43,25 +86,31 @@ export default function SubscriptionTable(): React.ReactNode {
         accessorKey: "name",
         header: "Name",
         enableSorting: true,
-        cell: ({ row }) => (
-          <div className="flex items-center gap-2 sm:table-cell">
-            {row.original.url ? (
-              <a
-                href={row.original.url || ""}
-                target="_blank"
-                className={classNames(
-                  "flex items-center gap-2 text-indigo-600 hover:text-indigo-600",
-                  !row.original.url && "text-gray-500",
-                )}
-              >
-                <span>{row.original.name}</span>
-                <LinkIcon className="h-3 w-3" />
-              </a>
-            ) : (
-              <span>{row.original.name}</span>
-            )}
-          </div>
-        ),
+        cell: ({ row }) => {
+          const subscription = row.original;
+          if (!subscription) return null;
+
+          return (
+            <div className="flex items-center gap-2 sm:table-cell">
+              {subscription.url ? (
+                <a
+                  href={subscription.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={classNames(
+                    "flex items-center gap-2 text-indigo-600 hover:text-indigo-600",
+                    !subscription.url && "text-gray-500"
+                  )}
+                >
+                  <span>{subscription.name}</span>
+                  <LinkIcon className="h-3 w-3" />
+                </a>
+              ) : (
+                <span>{subscription.name}</span>
+              )}
+            </div>
+          );
+        },
       },
       {
         accessorKey: "endDate",
@@ -104,10 +153,8 @@ export default function SubscriptionTable(): React.ReactNode {
                       row.original.price,
                       row.original.currency,
                       baseCurrency || "USD",
-                      rates || [],
-                      {
-                        decimalPlaces: 2,
-                      },
+                      rates,
+                      { decimalPlaces: 2 }
                     ).toFixed(2)}
                   </span>
                 </p>
@@ -144,25 +191,8 @@ export default function SubscriptionTable(): React.ReactNode {
         ),
       },
     ],
-    [rates],
+    [rates, baseCurrency]
   );
-
-  const handleDeleteSubscription = async () => {
-    if (selectedSubscription?.id) {
-      await deleteSubscription(selectedSubscription.id);
-      setSelectedSubscription(undefined);
-      setIsConfirmationOpen(false);
-      setIsToastOpen(true);
-      setMessage("The subscription has been deleted successfully.");
-      setType("success");
-      mutate();
-    }
-  };
-
-  const sortByNextBillingDate = (data: Subscription[]) =>
-    data.sort(
-      (a, b) => new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
-    );
 
   return (
     <div className="flex flex-col gap-6">
@@ -190,8 +220,9 @@ export default function SubscriptionTable(): React.ReactNode {
       <DataTable
         id="subscriptions-table"
         columns={columns}
-        data={sortByNextBillingDate(data || [])}
-        isLoading={isLoading || isRatesLoading}
+        data={sortedData}
+        isLoading={isLoading}
+        isLoadingMore={isValidating}
         error={error}
         onRefresh={mutate}
         searchPlaceholder="Search Subscription"
@@ -200,23 +231,20 @@ export default function SubscriptionTable(): React.ReactNode {
         stickyHeader={true}
         rowClassName="hover:bg-gray-50"
         headerClassName="bg-gray-100"
-        enablePagination={true}
-        defaultPageSize={10}
-        defaultPageIndex={0}
+        onLoadMore={handleLoadMore}
+        hasMore={hasMore}
         wrapperClassName="px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-20.5rem)] pb-8"
         modalComponent={
-          <>
-            <SubscriptionForm
-              isOpen={isOpen}
-              setIsOpen={setIsOpen}
-              subscription={selectedSubscription}
-              setSubscription={setSelectedSubscription}
-              onCloseAction={() => {
-                setSelectedSubscription(undefined);
-                setIsOpen(false);
-              }}
-            />
-          </>
+          <SubscriptionForm
+            isOpen={isOpen}
+            setIsOpen={setIsOpen}
+            subscription={selectedSubscription}
+            setSubscription={setSelectedSubscription}
+            onCloseAction={() => {
+              setSelectedSubscription(undefined);
+              setIsOpen(false);
+            }}
+          />
         }
       />
     </div>

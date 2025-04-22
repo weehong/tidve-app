@@ -1,20 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-
 import { PrismaClient } from "@prisma/client";
-
 import { auth0 } from "@/libs/auth/auth0";
 
-const prisma = new PrismaClient({
-  log: ["query", "info", "warn", "error"],
-});
+const prisma = new PrismaClient();
 
-export async function GET(): Promise<NextResponse> {
+const PAGE_SIZE = 10;
+
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await auth0.getSession();
 
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const { searchParams } = new URL(request.url);
+    const page = Number(searchParams.get('page')) || 1;
+    const pageSize = Number(searchParams.get('pageSize')) || PAGE_SIZE;
 
     const subscriptions = await prisma.subscription.findMany({
       where: {
@@ -31,9 +33,17 @@ export async function GET(): Promise<NextResponse> {
         endDate: true,
         url: true,
       },
+      skip: (page - 1) * pageSize,
+      take: pageSize + 1,
+      orderBy: {
+        endDate: 'asc',
+      },
     });
 
-    return NextResponse.json(subscriptions);
+    const hasMore = subscriptions.length > pageSize;
+    const data = subscriptions.slice(0, pageSize);
+
+    return NextResponse.json({ data, hasMore });
   } catch (error) {
     console.error(error);
     return NextResponse.json(
@@ -56,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     const subscription = await prisma.subscription.create({
       data: {
-        userId: session?.user.sub!,
+        userId: session.user.sub,
         name,
         currency,
         price,
