@@ -17,11 +17,26 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const { searchParams } = new URL(request.url);
     const page = Number(searchParams.get('page')) || 1;
     const pageSize = Number(searchParams.get('pageSize')) || PAGE_SIZE;
+    const searchTerm = searchParams.get('search') || '';
 
     const subscriptions = await prisma.subscription.findMany({
       where: {
         userId: session.user.sub,
         isActive: true,
+        OR: [
+          {
+            name: {
+              contains: searchTerm,
+              mode: 'insensitive',
+            },
+          },
+          {
+            url: {
+              contains: searchTerm,
+              mode: 'insensitive',
+            },
+          },
+        ],
       },
       select: {
         id: true,

@@ -102,7 +102,7 @@ export default function Sidebar({
             <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-indigo-600 px-6 pb-4">
               <div className="flex h-16 shrink-0 items-center">
                 <Image
-                  alt="Your Company"
+                  alt="Tidve App"
                   src="/logo.png"
                   className="h-8 w-auto"
                   width={32}
@@ -151,7 +151,7 @@ export default function Sidebar({
         <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-indigo-600 px-6 pb-4">
           <div className="flex h-16 shrink-0 items-center">
             <Image
-              alt="Your Company"
+              alt="Tidve App"
               src="/logo.png"
               className="h-8 w-auto"
               width={32}

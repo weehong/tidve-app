@@ -26,6 +26,8 @@ export type DataTableProps<TData> = {
   onLoadMore?: () => void;
   hasMore?: boolean;
   isLoadingMore?: boolean;
+  globalFilter?: string;
+  setGlobalFilter?: (value: string) => void;
 };
 
 export type TableSearchProps = {

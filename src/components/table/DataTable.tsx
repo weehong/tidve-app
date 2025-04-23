@@ -38,9 +38,10 @@ export function DataTable<TData>({
   modalComponent,
   onLoadMore,
   hasMore = false,
+  globalFilter,
+  setGlobalFilter,
 }: DataTableProps<TData>): React.ReactNode {
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [globalFilter, setGlobalFilter] = useState("");
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   const table = useReactTable({
@@ -85,8 +86,8 @@ export function DataTable<TData>({
       {enableGlobalFilter && (
         <div className="px-4 sm:px-6 lg:px-8">
           <TableSearch
-            globalFilter={globalFilter}
-            setGlobalFilter={setGlobalFilter}
+            globalFilter={globalFilter || ""}
+            setGlobalFilter={setGlobalFilter || (() => { })}
             searchPlaceholder={searchPlaceholder}
           />
         </div>
@@ -125,9 +126,12 @@ export function DataTable<TData>({
               rowClassName={rowClassName}
             />
 
-            {hasMore && (
-              <tr>
-                <td colSpan={columns.length} className="text-center py-4">
+            {data.length > 0 && hasMore && (
+              <tr className={classNames(
+                "flex flex-col rounded-md bg-white px-5 py-5 sm:table-row sm:p-0 dark:bg-gray-800",
+                { "cursor-pointer hover:bg-gray-50": onRowClick },
+              )}>
+                <td colSpan={columns.length}>
                   <div className="flex justify-center items-center gap-2">
                     {isLoadingMore ? (
                       <>

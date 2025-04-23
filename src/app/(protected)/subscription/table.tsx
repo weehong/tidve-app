@@ -24,11 +24,13 @@ export default function SubscriptionTable(): React.ReactNode {
   const [isOpen, setIsOpen] = useState(false);
   const [isConfirmationOpen, setIsConfirmationOpen] = useState(false);
   const [selectedSubscription, setSelectedSubscription] = useState<Subscription | undefined>(undefined);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const PAGE_SIZE = 10;
-  const getKey = (pageIndex: number, previousPageData: any) => {
+  const getKey = (pageIndex: number, previousPageData: PaginatedResponse) => {
     if (previousPageData && !previousPageData.hasMore) return null;
-    return `/api/subscription?page=${pageIndex + 1}&pageSize=${PAGE_SIZE}`;
+    return `/api/subscription?page=${pageIndex + 1}&pageSize=${PAGE_SIZE}${searchTerm ? `&search=${encodeURIComponent(searchTerm)}` : ""
+      }`;
   };
 
   const { data: pages, error, isLoading, isValidating, size, setSize, mutate } = useSWRInfinite(
@@ -226,6 +228,7 @@ export default function SubscriptionTable(): React.ReactNode {
         error={error}
         onRefresh={mutate}
         searchPlaceholder="Search Subscription"
+        globalFilter={searchTerm}
         enableSorting={true}
         enableGlobalFilter={true}
         stickyHeader={true}

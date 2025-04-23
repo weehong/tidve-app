@@ -3,12 +3,42 @@
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 import { TableSearchProps } from "@/types/table";
+import { useState, useRef, useEffect } from "react";
 
 export function TableSearch({
   globalFilter,
   setGlobalFilter,
   searchPlaceholder,
 }: TableSearchProps): React.ReactNode {
+  const [localFilter, setLocalFilter] = useState(globalFilter);
+  const debounceTimeout = useRef<NodeJS.Timeout>(null);
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+    };
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setLocalFilter(value);
+
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+
+    debounceTimeout.current = setTimeout(() => {
+      setGlobalFilter(value);
+    }, 300);
+  };
+
+  const handleClear = () => {
+    setLocalFilter("");
+    setGlobalFilter("");
+  };
+
   return (
     <form className="flex items-center">
       <label htmlFor="voice-search" className="sr-only">
@@ -24,16 +54,14 @@ export function TableSearch({
           className="block h-[38px] w-full rounded-md bg-white px-3 py-1.5 ps-10 text-base text-gray-900 outline outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6"
           placeholder={searchPlaceholder}
           required
-          value={globalFilter}
-          onChange={(e) => setGlobalFilter(e.target.value)}
+          value={localFilter}
+          onChange={handleChange}
         />
         {globalFilter && (
           <button
             type="button"
             className="absolute inset-y-0 end-0 flex items-center pe-3"
-            onClick={() => {
-              setGlobalFilter("");
-            }}
+            onClick={handleClear}
           >
             <XMarkIcon className="size-4 text-gray-500" />
           </button>

@@ -17,14 +17,14 @@ export default async function Navbar(): Promise<React.ReactNode> {
           <div className="flex">
             <div className="flex shrink-0 items-center">
               <Image
-                alt="Your Company"
+                alt="Tidve App"
                 src={"/logo.png"}
                 className="block h-8 w-auto lg:hidden"
                 width={32}
                 height={32}
               />
               <Image
-                alt="Your Company"
+                alt="Tidve App"
                 src={"/logo.png"}
                 className="hidden h-8 w-auto lg:block"
                 width={32}
