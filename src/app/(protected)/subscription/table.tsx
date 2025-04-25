@@ -6,6 +6,7 @@ import { LinkIcon } from "@heroicons/react/24/outline";
 import { Rate, Subscription } from "@prisma/client";
 import { ColumnDef } from "@tanstack/react-table";
 import classNames from "classnames";
+import moment from "moment";
 import useSWR from "swr";
 
 import SubscriptionForm from "@/app/(protected)/subscription/form";
@@ -17,7 +18,6 @@ import { convertBaseCurrency } from "@/libs/helper/currency-converter";
 import { useCurrencyStore } from "@/store/profile";
 import { useToastStore } from "@/store/toast";
 import { determineCycleType } from "@/utils/helper";
-import moment from "moment";
 
 export default function SubscriptionTable(): React.ReactNode {
   const { setIsOpen: setIsToastOpen, setMessage, setType } = useToastStore();
@@ -34,7 +34,7 @@ export default function SubscriptionTable(): React.ReactNode {
   );
   const { data, isLoading, error, mutate } = useSWR<Subscription[]>(
     "/api/subscription",
-    getSubscriptions,
+    () => getSubscriptions({ page: 1, pageSize: -1 }),
   );
 
   const columns = useMemo<ColumnDef<Subscription>[]>(
@@ -200,9 +200,6 @@ export default function SubscriptionTable(): React.ReactNode {
         stickyHeader={true}
         rowClassName="hover:bg-gray-50"
         headerClassName="bg-gray-100"
-        enablePagination={true}
-        defaultPageSize={10}
-        defaultPageIndex={0}
         wrapperClassName="px-4 sm:px-6 lg:px-8 min-h-[calc(100vh-20.5rem)] pb-8"
         modalComponent={
           <>

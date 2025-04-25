@@ -8,7 +8,9 @@ const prisma = new PrismaClient({
   log: ["query", "info", "warn", "error"],
 });
 
-export async function GET(): Promise<NextResponse> {
+const PAGE_SIZE = 10;
+
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await auth0.getSession();
 
@@ -16,10 +18,29 @@ export async function GET(): Promise<NextResponse> {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const { searchParams } = new URL(request.url);
+    const page = Number(searchParams.get("page")) || 1;
+    const pageSize = Number(searchParams.get("pageSize")) || PAGE_SIZE;
+    const searchTerm = request.nextUrl.searchParams.get("searchTerm");
+
     const subscriptions = await prisma.subscription.findMany({
       where: {
         userId: session.user.sub,
         isActive: true,
+        OR: [
+          {
+            name: {
+              contains: searchTerm || "",
+              mode: "insensitive",
+            },
+          },
+          {
+            url: {
+              contains: searchTerm || "",
+              mode: "insensitive",
+            },
+          },
+        ],
       },
       select: {
         id: true,
@@ -30,6 +51,11 @@ export async function GET(): Promise<NextResponse> {
         startDate: true,
         endDate: true,
         url: true,
+      },
+      skip: pageSize === -1 ? undefined : (page - 1) * pageSize,
+      take: pageSize === -1 ? undefined : pageSize + 1,
+      orderBy: {
+        endDate: "asc",
       },
     });
 

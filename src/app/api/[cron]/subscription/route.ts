@@ -47,14 +47,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const updates: UpdatedSubscription[] = [];
     const updatePromises = expiredSubscriptions.map(async (sub) => {
-      // Improved date calculation that handles month boundaries correctly
       const newEndDate = new Date(sub.endDate);
       const currentMonth = newEndDate.getMonth();
       newEndDate.setMonth(currentMonth + sub.cycleInMonths);
 
-      // Handle cases where the new month doesn't have enough days
       if (newEndDate.getMonth() !== (currentMonth + sub.cycleInMonths) % 12) {
-        newEndDate.setDate(0); // Set to last day of previous month
+        newEndDate.setDate(0);
       }
 
       updates.push({
@@ -87,7 +85,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         cycleInMonths: update.cycleInMonths,
         daysExtended: Math.round(
           (update.newEndDate.getTime() - update.previousEndDate.getTime()) /
-            (1000 * 60 * 60 * 24),
+          (1000 * 60 * 60 * 24),
         ),
       })),
       meta: {

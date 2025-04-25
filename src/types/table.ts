@@ -11,9 +11,6 @@ export type DataTableProps<TData> = {
   enableSorting?: boolean;
   enableGlobalFilter?: boolean;
   enableColumnFilters?: boolean;
-  enablePagination?: boolean;
-  defaultPageSize?: number;
-  defaultPageIndex?: number;
   stickyHeader?: boolean;
   customLoadingComponent?: React.ReactNode;
   customErrorComponent?: React.ReactNode;

@@ -49,7 +49,9 @@ export default function Dashboard(): React.ReactNode {
     data: subscriptions,
     isLoading: isSubscriptionsLoading,
     error,
-  } = useSWR("/api/subscription", getSubscriptions);
+  } = useSWR("/api/subscription", () =>
+    getSubscriptions({ page: 1, pageSize: -1 }),
+  );
 
   const { data: rates } = useSWR<Rate[]>("/api/rate", getExchangeRates);
 
@@ -127,12 +129,12 @@ export default function Dashboard(): React.ReactNode {
           const convertedPrice =
             rates && profile?.currency
               ? convertBaseCurrency(
-                row.original.price,
-                row.original.currency,
-                profile.currency,
-                rates,
-                { decimalPlaces: 2 },
-              )
+                  row.original.price,
+                  row.original.currency,
+                  profile.currency,
+                  rates,
+                  { decimalPlaces: 2 },
+                )
               : 0;
 
           return (
@@ -221,9 +223,6 @@ export default function Dashboard(): React.ReactNode {
           stickyHeader={true}
           rowClassName="hover:bg-gray-50"
           headerClassName="bg-gray-100"
-          enablePagination={false}
-          defaultPageSize={10}
-          defaultPageIndex={0}
         />
       </div>
     </div>
