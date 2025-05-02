@@ -26,7 +26,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const expiredSubscriptions = await prisma.subscription.findMany({
       where: {
-        endDate: { lt: today },
+        endDate: { lte: today },
         isActive: true,
       },
       select: {
@@ -51,7 +51,12 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       const currentMonth = newEndDate.getMonth();
       newEndDate.setMonth(currentMonth + sub.cycleInMonths);
 
-      if (newEndDate.getMonth() !== (currentMonth + sub.cycleInMonths) % 12) {
+      const isLastDay = newEndDate.getDate() === new Date(newEndDate.getFullYear(), newEndDate.getMonth() + 1, 0).getDate();
+      
+      if (isLastDay) {
+        newEndDate.setMonth(currentMonth + sub.cycleInMonths + 1);
+        newEndDate.setDate(0);
+      } else if (newEndDate.getMonth() !== (currentMonth + sub.cycleInMonths) % 12) {
         newEndDate.setDate(0);
       }
 

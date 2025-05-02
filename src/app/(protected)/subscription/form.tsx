@@ -41,7 +41,10 @@ const INITIAL_FORM_VALUES: SubscriptionFormValues = {
   price: 0,
   cycle: 1,
   start_date: new Date().toISOString().split("T")[0],
-  end_date: new Date().toISOString().split("T")[0],
+  end_date: moment(new Date().toISOString().split("T")[0])
+    .startOf("month")
+    .add(1, "months")
+    .format("YYYY-MM-DD"),
   url: undefined,
 } as const;
 
@@ -137,6 +140,7 @@ export default function SubscriptionForm({
           currency: data.currency.value,
           numberEmailSent: 0,
           url: data.url || null,
+          isLastDay: false,
         });
       } else {
         res = await createSubscription({
@@ -147,6 +151,7 @@ export default function SubscriptionForm({
           currency: data.currency.value,
           numberEmailSent: 0,
           url: data.url || null,
+          isLastDay: false,
         });
       }
 

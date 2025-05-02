@@ -9,6 +9,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import moment from "moment";
 import useSWR from "swr";
 
+import SubscriptionCard from "@/components/card/SubscriptionCard";
+import CardSkeleton from "@/components/spinner/CardSkeleton";
 import Skeleton from "@/components/spinner/Skeleton";
 import { DataTable } from "@/components/table/DataTable";
 import { getProfile } from "@/libs/api/profile";
@@ -31,12 +33,6 @@ const CurrencyDisplay: React.FC<CurrencyDisplayProps> = ({
     <span>{currency}</span>
     <span>{amount.toFixed(2)}</span>
   </p>
-);
-
-const LoadingSkeleton: React.FC = (): React.ReactNode => (
-  <div className="flex items-center gap-2">
-    <Skeleton className="my-2 h-9 w-full" />
-  </div>
 );
 
 export default function Dashboard(): React.ReactNode {
@@ -72,6 +68,56 @@ export default function Dashboard(): React.ReactNode {
       0,
     );
   }, [subscriptions, rates, profile?.currency]);
+
+  const monthlyCommitments = useMemo(() => {
+    if (!subscriptions?.length || !rates?.length || !profile?.currency) {
+      return 0;
+    }
+
+    return subscriptions
+      .filter((subscription) => subscription.cycleInMonths === 1)
+      .reduce(
+        (acc, subscription) =>
+          acc +
+          convertBaseCurrency(
+            subscription.price,
+            subscription.currency,
+            profile.currency,
+            rates,
+          ),
+        0,
+      );
+  }, [subscriptions, rates, profile?.currency]);
+
+  const expiringThisMonth = useMemo(() => {
+    if (!subscriptions?.length) return [];
+
+    const today = moment();
+    const endOfMonth = moment().endOf("month");
+
+    return subscriptions.filter((subscription) => {
+      const endDate = moment(subscription.endDate);
+      return endDate.isBetween(today, endOfMonth, "day", "[]");
+    });
+  }, [subscriptions]);
+
+  const expiringThisMonthTotal = useMemo(() => {
+    if (!expiringThisMonth.length || !rates?.length || !profile?.currency) {
+      return 0;
+    }
+
+    return expiringThisMonth.reduce(
+      (acc, subscription) =>
+        acc +
+        convertBaseCurrency(
+          subscription.price,
+          subscription.currency,
+          profile.currency,
+          rates,
+        ),
+      0,
+    );
+  }, [expiringThisMonth, rates, profile?.currency]);
 
   const expiringSubscriptions = useMemo(() => {
     if (!subscriptions?.length) return [];
@@ -167,37 +213,16 @@ export default function Dashboard(): React.ReactNode {
 
   return (
     <div className="grid grid-cols-2 gap-6 px-4 py-10 sm:grid-cols-4 sm:px-6 lg:grid-cols-3 lg:px-8 xl:grid-cols-4">
-      <div className="col-span-4 block rounded-lg border border-gray-200 bg-white p-6 shadow-sm sm:col-span-2 md:col-span-1 dark:border-gray-700 dark:bg-gray-800">
-        <h5 className="font-roobert mb-2 text-sm font-bold tracking-widest text-gray-500 uppercase dark:text-white">
-          {subscriptions?.length} Subscription
-        </h5>
-
-        {isSubscriptionsLoading ? (
-          <LoadingSkeleton />
-        ) : profile ? (
-          <p className="font-instrument py-2 text-right text-3xl font-normal text-wrap break-words text-gray-900 dark:text-gray-400">
-            {formattedTotal}
-          </p>
-        ) : (
-          <p className="text-right font-normal text-gray-900 dark:text-gray-400">
-            &#8734;
-          </p>
-        )}
-
-        <div className="flex items-center justify-end">
-          <div className="font-instrument flex items-center justify-end gap-1 text-right text-sm font-bold text-gray-500 dark:text-white">
-            {isProfileLoading ? (
-              <Skeleton className="h-4 w-8" />
-            ) : (
-              <p className="text-gray-900 dark:text-gray-400">
-                {profile?.currency || <span>&#8212;</span>}
-              </p>
-            )}
-            <p className="text-gray-500 dark:text-gray-400">/</p>
-            <p className="text-gray-500 dark:text-gray-400">month</p>
-          </div>
-        </div>
-      </div>
+      <SubscriptionCard
+        subscriptions={subscriptions || []}
+        isSubscriptionsLoading={isSubscriptionsLoading}
+        profile={profile || null}
+        isProfileLoading={isProfileLoading}
+        formattedTotal={formattedTotal}
+        monthlyCommitments={monthlyCommitments}
+        expiringThisMonth={expiringThisMonth}
+        expiringThisMonthTotal={expiringThisMonthTotal}
+      />
 
       <div className="col-span-4 mt-6">
         <div className="mb-4 flex flex-col justify-start gap-2 sm:flex-row sm:items-center sm:justify-between">

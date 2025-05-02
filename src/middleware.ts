@@ -18,10 +18,20 @@ const redirectToLogin = (request: NextRequest) => {
   return NextResponse.redirect(redirectUrl);
 };
 
+const redirectToDashboard = (request: NextRequest) => {
+  return NextResponse.redirect(new URL(`${request.nextUrl.origin}/dashboard`, request.url));
+};
+
 export async function middleware(request: NextRequest) {
   const res = await auth0.middleware(request);
 
   if (publicPaths.includes(request.nextUrl.pathname)) {
+    const session = await auth0.getSession(request);
+
+    if (session) {
+      return redirectToDashboard(request);
+    }
+
     return res;
   }
 
