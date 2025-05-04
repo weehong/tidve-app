@@ -2,7 +2,6 @@ import { Profile, Subscription } from "@prisma/client";
 import moment from "moment";
 
 import CardSkeleton from "../spinner/CardSkeleton";
-import Skeleton from "../spinner/Skeleton";
 
 type SubscriptionCardProps = {
   subscriptions: Subscription[];
@@ -11,8 +10,7 @@ type SubscriptionCardProps = {
   isProfileLoading: boolean;
   formattedTotal: string;
   monthlyCommitments: number;
-  expiringThisMonth: Subscription[];
-  expiringThisMonthTotal: number;
+  amountToPayIn30Days: number;
 };
 
 export default function SubscriptionCard({
@@ -22,8 +20,7 @@ export default function SubscriptionCard({
   isProfileLoading,
   formattedTotal,
   monthlyCommitments,
-  expiringThisMonth,
-  expiringThisMonthTotal,
+  amountToPayIn30Days,
 }: SubscriptionCardProps): React.ReactNode {
   if (isSubscriptionsLoading || isProfileLoading) {
     return <CardSkeleton />;
@@ -39,32 +36,42 @@ export default function SubscriptionCard({
         .trim()
     : "";
 
-  const formattedExpiringTotal = profile?.currency
+  const formattedAmountToPayIn30Days = profile?.currency
     ? new Intl.NumberFormat("en-US", {
         style: "currency",
         currency: profile.currency,
       })
-        .format(expiringThisMonthTotal)
+        .format(amountToPayIn30Days)
         .replace(profile.currency, "")
         .trim()
     : "";
 
-  const calculatedMonthlySubscriptions = subscriptions.filter((subscription) =>
-    moment(subscription.startDate).isSame(moment(), "month"),
+  const calculatedMonthlySubscriptions = subscriptions.filter(
+    (subscription) => subscription.cycleInMonths === 1,
   ).length;
 
   return (
     <div className="col-span-4 rounded-lg bg-white p-6 shadow-sm">
-      <div className="grid grid-cols-1 flex-col justify-between gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-1 flex-col justify-between gap-4 sm:grid-cols-3">
         <div>
           <h3 className="text-lg font-semibold text-gray-900">
-            Expiring This Month
+            Due in 30 Days
           </h3>
           <p className="mt-2 text-3xl font-bold text-gray-900">
-            {formattedExpiringTotal}
+            {formattedAmountToPayIn30Days}
           </p>
           <p className="mt-1 text-sm text-gray-500">
-            {expiringThisMonth.length} subscription(s)
+            {
+              subscriptions.filter((sub) =>
+                moment(sub.endDate).isBetween(
+                  moment(),
+                  moment().add(30, "days"),
+                  "day",
+                  "[)",
+                ),
+              ).length
+            }{" "}
+            subscription(s)
           </p>
         </div>
 

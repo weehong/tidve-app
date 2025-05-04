@@ -18,7 +18,7 @@
     "@heroicons/react": "^2.2.0",
     "@hookform/resolvers": "^5.0.1",
     "@prisma/client": "^6.4.0",
-    "@react-email/components": "^0.0.34",
+    "@react-email/components": "^0.0.38",
     "@tailwindcss/postcss": "^4.0.6",
     "@tanstack/match-sorter-utils": "^8.19.4",
     "@tanstack/react-table": "^8.20.6",

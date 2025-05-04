@@ -89,36 +89,6 @@ export default function Dashboard(): React.ReactNode {
       );
   }, [subscriptions, rates, profile?.currency]);
 
-  const expiringThisMonth = useMemo(() => {
-    if (!subscriptions?.length) return [];
-
-    const today = moment();
-    const endOfMonth = moment().endOf("month");
-
-    return subscriptions.filter((subscription) => {
-      const endDate = moment(subscription.endDate);
-      return endDate.isBetween(today, endOfMonth, "day", "[]");
-    });
-  }, [subscriptions]);
-
-  const expiringThisMonthTotal = useMemo(() => {
-    if (!expiringThisMonth.length || !rates?.length || !profile?.currency) {
-      return 0;
-    }
-
-    return expiringThisMonth.reduce(
-      (acc, subscription) =>
-        acc +
-        convertBaseCurrency(
-          subscription.price,
-          subscription.currency,
-          profile.currency,
-          rates,
-        ),
-      0,
-    );
-  }, [expiringThisMonth, rates, profile?.currency]);
-
   const expiringSubscriptions = useMemo(() => {
     if (!subscriptions?.length) return [];
 
@@ -134,6 +104,24 @@ export default function Dashboard(): React.ReactNode {
       return endDate.isBetween(today, thirtyDaysFromNow, "day", "[)");
     });
   }, [subscriptions]);
+
+  const amountToPayIn30Days = useMemo(() => {
+    if (!expiringSubscriptions.length || !rates?.length || !profile?.currency) {
+      return 0;
+    }
+
+    return expiringSubscriptions.reduce(
+      (acc, subscription) =>
+        acc +
+        convertBaseCurrency(
+          subscription.price,
+          subscription.currency,
+          profile.currency,
+          rates,
+        ),
+      0,
+    );
+  }, [expiringSubscriptions, rates, profile?.currency]);
 
   const columns = useMemo<ColumnDef<Subscription>[]>(
     () => [
@@ -220,8 +208,7 @@ export default function Dashboard(): React.ReactNode {
         isProfileLoading={isProfileLoading}
         formattedTotal={formattedTotal}
         monthlyCommitments={monthlyCommitments}
-        expiringThisMonth={expiringThisMonth}
-        expiringThisMonthTotal={expiringThisMonthTotal}
+        amountToPayIn30Days={amountToPayIn30Days}
       />
 
       <div className="col-span-4 mt-6">
