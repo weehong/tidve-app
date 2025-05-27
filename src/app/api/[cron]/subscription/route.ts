@@ -51,12 +51,21 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       const currentMonth = newEndDate.getMonth();
       newEndDate.setMonth(currentMonth + sub.cycleInMonths);
 
-      const isLastDay = newEndDate.getDate() === new Date(newEndDate.getFullYear(), newEndDate.getMonth() + 1, 0).getDate();
-      
+      const isLastDay =
+        newEndDate.getDate() ===
+        new Date(
+          newEndDate.getFullYear(),
+          newEndDate.getMonth() + 1,
+          0,
+        ).getDate();
+
       if (isLastDay) {
         newEndDate.setMonth(currentMonth + sub.cycleInMonths + 1);
         newEndDate.setDate(0);
-      } else if (newEndDate.getMonth() !== (currentMonth + sub.cycleInMonths) % 12) {
+      } else if (
+        newEndDate.getMonth() !==
+        (currentMonth + sub.cycleInMonths) % 12
+      ) {
         newEndDate.setDate(0);
       }
 
@@ -73,6 +82,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         data: {
           endDate: newEndDate,
           updatedAt: new Date(),
+          numberEmailSent: 0,
         },
       });
     });
@@ -90,7 +100,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         cycleInMonths: update.cycleInMonths,
         daysExtended: Math.round(
           (update.newEndDate.getTime() - update.previousEndDate.getTime()) /
-          (1000 * 60 * 60 * 24),
+            (1000 * 60 * 60 * 24),
         ),
       })),
       meta: {
