@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "email": "email dev --dir src/emails",
-    "seed": "ts-node --project tsconfig.seed.json prisma/seed.ts"
+    "seed": "ts-node --project tsconfig.seed.json prisma/seed.ts",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.0.0-beta.14",
