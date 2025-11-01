@@ -9,6 +9,9 @@
     "lint": "next lint",
     "email": "email dev --dir src/emails",
     "seed": "ts-node --project tsconfig.seed.json prisma/seed.ts",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -42,6 +45,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@typescript-eslint/eslint-plugin": "^8.24.0",
+    "@vitest/ui": "^4.0.6",
     "eslint": "^9",
     "eslint-config-next": "^15.2.3",
     "postcss": "^8.5.2",
@@ -51,6 +55,7 @@
     "sass": "^1.84.0",
     "tailwindcss": "^4.0.6",
     "ts-node": "^10.9.2",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.0.6"
   }
 }

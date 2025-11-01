@@ -47,7 +47,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         name: true,
         currency: true,
         price: true,
+        cycleType: true,
         cycleInMonths: true,
+        cycleDays: true,
         startDate: true,
         endDate: true,
         url: true,
@@ -77,8 +79,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, currency, price, cycle, start_date, end_date, url } =
-      await request.json();
+    const {
+      name,
+      currency,
+      price,
+      cycle,
+      cycle_type,
+      cycle_days,
+      start_date,
+      end_date,
+      url
+    } = await request.json();
 
     const subscription = await prisma.subscription.create({
       data: {
@@ -86,7 +97,9 @@ export async function POST(request: NextRequest) {
         name,
         currency,
         price,
+        cycleType: cycle_type || 'MONTHLY',
         cycleInMonths: cycle,
+        cycleDays: cycle_days || null,
         startDate: new Date(start_date),
         endDate: new Date(end_date),
         url,
@@ -96,7 +109,9 @@ export async function POST(request: NextRequest) {
         name: true,
         currency: true,
         price: true,
+        cycleType: true,
         cycleInMonths: true,
+        cycleDays: true,
         startDate: true,
         endDate: true,
         url: true,

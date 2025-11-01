@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: number }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth0.getSession();
@@ -35,7 +35,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: number }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth0.getSession();
@@ -61,16 +61,27 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, currency, price, cycle, start_date, end_date, url } =
-      await request.json();
+    const {
+      name,
+      currency,
+      price,
+      cycle,
+      cycle_type,
+      cycle_days,
+      start_date,
+      end_date,
+      url
+    } = await request.json();
 
-    await prisma.subscription.update({
+    const updated = await prisma.subscription.update({
       where: { id: Number(id) },
       data: {
         name,
         currency,
         price,
+        cycleType: cycle_type || subscription.cycleType,
         cycleInMonths: cycle,
+        cycleDays: cycle_days !== undefined ? cycle_days : subscription.cycleDays,
         startDate: new Date(start_date),
         endDate: new Date(end_date),
         url,
@@ -79,17 +90,19 @@ export async function PUT(
     });
 
     return NextResponse.json({
-      id: subscription.id,
-      name: subscription.name,
-      currency: subscription.currency,
-      price: subscription.price,
-      cycleInMonths: subscription.cycleInMonths,
-      startDate: subscription.startDate,
-      endDate: subscription.endDate,
-      url: subscription.url,
-      isActive: subscription.isActive,
-      createdAt: subscription.createdAt,
-      updatedAt: subscription.updatedAt,
+      id: updated.id,
+      name: updated.name,
+      currency: updated.currency,
+      price: updated.price,
+      cycleType: updated.cycleType,
+      cycleInMonths: updated.cycleInMonths,
+      cycleDays: updated.cycleDays,
+      startDate: updated.startDate,
+      endDate: updated.endDate,
+      url: updated.url,
+      isActive: updated.isActive,
+      createdAt: updated.createdAt,
+      updatedAt: updated.updatedAt,
     });
   } catch (error) {
     console.error("Error fetching subscription", error);
@@ -102,7 +115,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: number }> },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await auth0.getSession();

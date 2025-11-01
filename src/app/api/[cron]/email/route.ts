@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
 
 const prisma = new PrismaClient();
-const resend = new Resend(process.env.RESEND_API_KEY);
+const getResend = () => new Resend(process.env.RESEND_API_KEY);
 
 const EMAIL_CONFIG = {
   FROM: "Tidve <tidve@resend.dev>",
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
               ? REMINDER_PERIODS.FIRST_REMINDER
               : REMINDER_PERIODS.SECOND_REMINDER;
 
-          await resend.emails.send({
+          await getResend().emails.send({
             from: EMAIL_CONFIG.FROM,
             to: email,
             subject: EMAIL_CONFIG.SUBJECT,

@@ -39,6 +39,7 @@ const INITIAL_FORM_VALUES: SubscriptionFormValues = {
     label: "USD",
   },
   price: 0,
+  cycle_type: "MONTHLY",
   cycle: 1,
   start_date: new Date().toISOString().split("T")[0],
   end_date: moment(new Date().toISOString().split("T")[0])
@@ -133,10 +134,13 @@ export default function SubscriptionForm({
 
       if (subscription) {
         res = await updateSubscription(subscription.id, {
-          ...data,
+          name: data.name,
+          price: data.price,
           startDate: new Date(data.start_date),
           endDate: new Date(data.end_date),
-          cycleInMonths: data.cycle,
+          cycleType: data.cycle_type,
+          cycleInMonths: data.cycle ?? 1,
+          cycleDays: data.cycle_days ?? null,
           currency: data.currency.value,
           numberEmailSent: 0,
           url: data.url || null,
@@ -144,10 +148,13 @@ export default function SubscriptionForm({
         });
       } else {
         res = await createSubscription({
-          ...data,
+          name: data.name,
+          price: data.price,
           startDate: new Date(data.start_date),
           endDate: new Date(data.end_date),
-          cycleInMonths: data.cycle,
+          cycleType: data.cycle_type,
+          cycleInMonths: data.cycle ?? 1,
+          cycleDays: data.cycle_days ?? null,
           currency: data.currency.value,
           numberEmailSent: 0,
           url: data.url || null,

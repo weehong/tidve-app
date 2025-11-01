@@ -3,118 +3,199 @@ import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
 import { isVercelCron } from "@/libs/helper/check-cron-header";
+import {
+  calculateNextRenewalDates,
+  shouldRenewSubscription,
+  formatRenewalLog,
+} from "@/utils/subscription-renewal";
+import { CycleType } from "@/types/subscription";
 
 const prisma = new PrismaClient();
 
 type UpdatedSubscription = {
   id: number;
   name: string;
+  userId: string;
+  previousStartDate: Date;
   previousEndDate: Date;
+  newStartDate: Date;
   newEndDate: Date;
+  cycleType: CycleType;
   cycleInMonths: number;
+  cycleDays: number | null;
+  daysExtended: number;
+};
+
+type RenewalError = {
+  id: number;
+  name: string;
+  error: string;
 };
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   if (!isVercelCron(request)) {
-    console.error("[Subscription Reminder] Unauthorized access attempt");
+    console.error("[Subscription Renewal] Unauthorized access attempt");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const startTime = Date.now();
+  console.log(`[Subscription Renewal] Starting renewal process at ${new Date().toISOString()}`);
+
   try {
+    // Get current date at midnight for comparison
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const expiredSubscriptions = await prisma.subscription.findMany({
+    // Find subscriptions due for renewal
+    // Using exact date match (currentDate == endDate)
+    const subscriptionsDueForRenewal = await prisma.subscription.findMany({
       where: {
-        endDate: { lte: today },
         isActive: true,
       },
       select: {
         id: true,
         name: true,
-        endDate: true,
-        cycleInMonths: true,
         userId: true,
+        startDate: true,
+        endDate: true,
+        cycleType: true,
+        cycleInMonths: true,
+        cycleDays: true,
       },
     });
 
-    if (expiredSubscriptions.length === 0) {
+    // Filter subscriptions that need renewal based on exact date match
+    const subscriptionsToRenew = subscriptionsDueForRenewal.filter((sub) =>
+      shouldRenewSubscription(sub.endDate, today, true)
+    );
+
+    console.log(
+      `[Subscription Renewal] Found ${subscriptionsToRenew.length} subscription(s) due for renewal`
+    );
+
+    if (subscriptionsToRenew.length === 0) {
       return NextResponse.json(
-        { message: "No subscriptions require updates" },
+        {
+          success: true,
+          message: "No subscriptions require renewal today",
+          data: [],
+          meta: {
+            checkedAt: new Date().toISOString(),
+            totalChecked: subscriptionsDueForRenewal.length,
+            totalRenewed: 0,
+            processingTimeMs: Date.now() - startTime,
+          },
+        },
         { status: 200 },
       );
     }
 
     const updates: UpdatedSubscription[] = [];
-    const updatePromises = expiredSubscriptions.map(async (sub) => {
-      const newEndDate = new Date(sub.endDate);
-      const currentMonth = newEndDate.getMonth();
-      newEndDate.setMonth(currentMonth + sub.cycleInMonths);
+    const errors: RenewalError[] = [];
 
-      const isLastDay =
-        newEndDate.getDate() ===
-        new Date(
-          newEndDate.getFullYear(),
-          newEndDate.getMonth() + 1,
-          0,
-        ).getDate();
+    // Process each subscription renewal in a transaction to prevent data loss
+    for (const sub of subscriptionsToRenew) {
+      try {
+        await prisma.$transaction(async (tx) => {
+          // Calculate new dates
+          const renewal = calculateNextRenewalDates(
+            sub.endDate,
+            sub.cycleType as CycleType,
+            sub.cycleInMonths,
+            sub.cycleDays
+          );
 
-      if (isLastDay) {
-        newEndDate.setMonth(currentMonth + sub.cycleInMonths + 1);
-        newEndDate.setDate(0);
-      } else if (
-        newEndDate.getMonth() !==
-        (currentMonth + sub.cycleInMonths) % 12
-      ) {
-        newEndDate.setDate(0);
+          // Update subscription with new dates
+          await tx.subscription.update({
+            where: { id: sub.id },
+            data: {
+              startDate: renewal.newStartDate,
+              endDate: renewal.newEndDate,
+              numberEmailSent: 0,
+              updatedAt: new Date(),
+            },
+          });
+
+          // Track successful update
+          updates.push({
+            id: sub.id,
+            name: sub.name,
+            userId: sub.userId,
+            previousStartDate: sub.startDate,
+            previousEndDate: sub.endDate,
+            newStartDate: renewal.newStartDate,
+            newEndDate: renewal.newEndDate,
+            cycleType: sub.cycleType as CycleType,
+            cycleInMonths: sub.cycleInMonths,
+            cycleDays: sub.cycleDays,
+            daysExtended: renewal.daysExtended,
+          });
+
+          // Log successful renewal
+          const logMessage = formatRenewalLog(
+            sub.id,
+            sub.name,
+            sub.userId,
+            sub.endDate,
+            renewal.newEndDate,
+            sub.cycleType as CycleType,
+            renewal.daysExtended
+          );
+          console.log(logMessage);
+        });
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        console.error(
+          `[Subscription Renewal] Failed to renew subscription ${sub.id} (${sub.name}):`,
+          errorMessage
+        );
+
+        errors.push({
+          id: sub.id,
+          name: sub.name,
+          error: errorMessage,
+        });
       }
+    }
 
-      updates.push({
-        id: sub.id,
-        name: sub.name,
-        previousEndDate: sub.endDate,
-        newEndDate,
-        cycleInMonths: sub.cycleInMonths,
-      });
-
-      return prisma.subscription.update({
-        where: { id: sub.id },
-        data: {
-          endDate: newEndDate,
-          updatedAt: new Date(),
-          numberEmailSent: 0,
-        },
-      });
-    });
-
-    await Promise.all(updatePromises);
+    const processingTime = Date.now() - startTime;
+    console.log(
+      `[Subscription Renewal] Completed: ${updates.length} successful, ${errors.length} failed, ${processingTime}ms`
+    );
 
     return NextResponse.json({
       success: true,
-      message: `${updates.length} subscription(s) updated`,
+      message: `${updates.length} subscription(s) renewed successfully`,
       data: updates.map((update) => ({
         subscriptionId: update.id,
         subscriptionName: update.name,
+        userId: update.userId,
+        cycleType: update.cycleType,
+        previousStartDate: update.previousStartDate.toISOString(),
         previousEndDate: update.previousEndDate.toISOString(),
+        newStartDate: update.newStartDate.toISOString(),
         newEndDate: update.newEndDate.toISOString(),
-        cycleInMonths: update.cycleInMonths,
-        daysExtended: Math.round(
-          (update.newEndDate.getTime() - update.previousEndDate.getTime()) /
-            (1000 * 60 * 60 * 24),
-        ),
+        daysExtended: update.daysExtended,
       })),
+      errors: errors.length > 0 ? errors : undefined,
       meta: {
-        updatedAt: new Date().toISOString(),
-        totalProcessed: expiredSubscriptions.length,
+        renewedAt: new Date().toISOString(),
+        totalChecked: subscriptionsDueForRenewal.length,
+        totalDueForRenewal: subscriptionsToRenew.length,
+        totalRenewed: updates.length,
+        totalFailed: errors.length,
+        processingTimeMs: processingTime,
       },
     });
   } catch (error) {
-    console.error("Subscription update error:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    console.error("[Subscription Renewal] Critical error:", errorMessage);
+
     return NextResponse.json(
       {
         success: false,
-        error: "Failed to update subscriptions",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: "Failed to process subscription renewals",
+        details: errorMessage,
       },
       { status: 500 },
     );
