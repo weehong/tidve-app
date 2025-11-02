@@ -20,7 +20,10 @@ type AlignmentError = {
   error: string;
 };
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ cron: string }> }
+): Promise<NextResponse> {
   if (!isVercelCron(request)) {
     console.error("[Subscription Alignment] Unauthorized access attempt");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

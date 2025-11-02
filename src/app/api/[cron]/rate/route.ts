@@ -12,7 +12,10 @@ type UpdatedRate = {
   newRate: number;
 };
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ cron: string }> }
+): Promise<NextResponse> {
   try {
     const currencies = await getExternalExchangeRates();
     if (!currencies?.rates) {

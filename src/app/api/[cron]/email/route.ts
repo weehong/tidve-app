@@ -30,7 +30,10 @@ type EmailProcessResult = {
   error?: string;
 };
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ cron: string }> }
+) {
   if (!isVercelCron(request)) {
     console.error("[Subscription Reminder] Unauthorized access attempt");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
