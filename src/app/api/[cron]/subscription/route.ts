@@ -46,6 +46,49 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    // Reset email counter for subscriptions that started today (new cycle began)
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const subscriptionsStartedToday = await prisma.subscription.findMany({
+      where: {
+        isActive: true,
+        numberEmailSent: { gt: 0 }, // Has sent emails in previous cycle
+        startDate: {
+          gte: today, // Started today
+          lt: tomorrow, // But not future dates
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        numberEmailSent: true,
+      },
+    });
+
+    let emailCountersReset = 0;
+    if (subscriptionsStartedToday.length > 0) {
+      const resetResult = await prisma.subscription.updateMany({
+        where: {
+          id: { in: subscriptionsStartedToday.map((s) => s.id) },
+        },
+        data: {
+          numberEmailSent: 0,
+        },
+      });
+
+      emailCountersReset = resetResult.count;
+      console.log(
+        `[Subscription Renewal] Reset email counters for ${emailCountersReset} subscription(s) that started today`
+      );
+
+      subscriptionsStartedToday.forEach((sub) => {
+        console.log(
+          `[Subscription Renewal] Reset counter for subscription ${sub.id} (${sub.name}) from ${sub.numberEmailSent} to 0`
+        );
+      });
+    }
+
     // Find subscriptions due for renewal
     // Using exact date match (currentDate == endDate)
     const subscriptionsDueForRenewal = await prisma.subscription.findMany({
@@ -83,6 +126,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
             checkedAt: new Date().toISOString(),
             totalChecked: subscriptionsDueForRenewal.length,
             totalRenewed: 0,
+            emailCountersReset,
             processingTimeMs: Date.now() - startTime,
           },
         },
@@ -160,7 +204,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const processingTime = Date.now() - startTime;
     console.log(
-      `[Subscription Renewal] Completed: ${updates.length} successful, ${errors.length} failed, ${processingTime}ms`
+      `[Subscription Renewal] Completed: ${updates.length} successful, ${errors.length} failed, ${emailCountersReset} counters reset, ${processingTime}ms`
     );
 
     return NextResponse.json({
@@ -184,6 +228,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         totalDueForRenewal: subscriptionsToRenew.length,
         totalRenewed: updates.length,
         totalFailed: errors.length,
+        emailCountersReset,
         processingTimeMs: processingTime,
       },
     });

@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "CycleType" AS ENUM ('DAILY', 'MONTHLY', 'CUSTOM');
+
 -- CreateTable
 CREATE TABLE "profiles" (
     "id" SERIAL NOT NULL,
@@ -21,7 +24,9 @@ CREATE TABLE "subscriptions" (
     "price" DOUBLE PRECISION NOT NULL,
     "start_date" TIMESTAMP(3) NOT NULL,
     "end_date" TIMESTAMP(3) NOT NULL,
+    "cycle_type" "CycleType" NOT NULL DEFAULT 'MONTHLY',
     "cycle_in_months" INTEGER NOT NULL,
+    "cycle_days" INTEGER,
     "url" TEXT,
     "number_email_sent" INTEGER NOT NULL DEFAULT 0,
     "is_last_day" BOOLEAN NOT NULL DEFAULT false,
@@ -60,6 +65,9 @@ CREATE INDEX "subscriptions_user_id_idx" ON "subscriptions"("user_id");
 
 -- CreateIndex
 CREATE INDEX "subscriptions_name_idx" ON "subscriptions"("name");
+
+-- CreateIndex
+CREATE INDEX "subscriptions_end_date_idx" ON "subscriptions"("end_date");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "rates_code_key" ON "rates"("code");
