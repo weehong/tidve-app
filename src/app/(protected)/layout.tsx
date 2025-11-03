@@ -25,7 +25,7 @@ export default async function ProtectedLayout({
       </Head>
       <body className="antialiased">
         <Toast />
-        <Sidebar session={session} children={children} />
+        <Sidebar session={session}>{children}</Sidebar>
       </body>
     </html>
   );

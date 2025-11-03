@@ -10,8 +10,6 @@ import moment from "moment";
 import useSWR from "swr";
 
 import SubscriptionCard from "@/components/card/SubscriptionCard";
-import CardSkeleton from "@/components/spinner/CardSkeleton";
-import Skeleton from "@/components/spinner/Skeleton";
 import { DataTable } from "@/components/table/DataTable";
 import { getProfile } from "@/libs/api/profile";
 import { getExchangeRates } from "@/libs/api/rate";

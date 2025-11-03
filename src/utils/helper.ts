@@ -1,4 +1,5 @@
 import { CurrenciesProps, CurrencyOptionProps } from "@/types/currency";
+import { CycleType } from "@/types/subscription";
 
 export const renderCurrencyOption = (
   currencies: CurrenciesProps,
@@ -25,4 +26,32 @@ export const determineCycleType = (months: number): string => {
   }
 
   return cycleMap[months] || `Adhoc (${months}-Month Cycle)`;
+};
+
+/**
+ * Format cycle display based on cycle type
+ */
+export const formatCycleDisplay = (
+  cycleType: CycleType,
+  cycleInMonths: number,
+  cycleDays?: number | null
+): string => {
+  switch (cycleType) {
+    case CycleType.DAILY:
+      return "Daily";
+
+    case CycleType.MONTHLY:
+      return determineCycleType(cycleInMonths);
+
+    case CycleType.CUSTOM:
+      if (cycleDays) {
+        if (cycleDays === 7) return "Weekly";
+        if (cycleDays === 14) return "Bi-Weekly";
+        return `Every ${cycleDays} days`;
+      }
+      return "Custom";
+
+    default:
+      return "Unknown";
+  }
 };

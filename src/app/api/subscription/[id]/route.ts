@@ -61,17 +61,21 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const {
-      name,
-      currency,
-      price,
-      cycle,
-      cycle_type,
-      cycle_days,
-      start_date,
-      end_date,
-      url
-    } = await request.json();
+    const body = await request.json();
+
+    // Map both camelCase (from form) and snake_case field names
+    const name = body.name;
+    const currency = body.currency;
+    const price = body.price;
+    const cycleType = body.cycleType || body.cycle_type || subscription.cycleType;
+    const cycleInMonths = body.cycleInMonths || body.cycle;
+    const cycleDays = body.cycleDays !== undefined ? body.cycleDays : (body.cycle_days !== undefined ? body.cycle_days : subscription.cycleDays);
+    const startDate = body.startDate || body.start_date;
+    const endDate = body.endDate || body.end_date;
+    const url = body.url;
+
+    // Check if endDate changed to reset email counter
+    const endDateChanged = new Date(endDate).getTime() !== subscription.endDate.getTime();
 
     const updated = await prisma.subscription.update({
       where: { id: Number(id) },
@@ -79,11 +83,12 @@ export async function PUT(
         name,
         currency,
         price,
-        cycleType: cycle_type || subscription.cycleType,
-        cycleInMonths: cycle,
-        cycleDays: cycle_days !== undefined ? cycle_days : subscription.cycleDays,
-        startDate: new Date(start_date),
-        endDate: new Date(end_date),
+        cycleType,
+        cycleInMonths,
+        cycleDays,
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
+        numberEmailSent: endDateChanged ? 0 : subscription.numberEmailSent,
         url,
         isActive: true,
       },

@@ -34,7 +34,8 @@ type RenewalError = {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ cron: string }> }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _context: { params: Promise<{ cron: string }> }
 ): Promise<NextResponse> {
   if (!isVercelCron(request)) {
     console.error("[Subscription Renewal] Unauthorized access attempt");

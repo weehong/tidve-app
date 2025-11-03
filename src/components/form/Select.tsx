@@ -106,7 +106,6 @@ export const Select = <T extends FieldValues>({
   isLoading,
   label,
   hideLabel = false,
-  value,
   defaultValue,
   isDisabled,
   required,

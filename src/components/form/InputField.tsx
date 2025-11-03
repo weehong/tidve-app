@@ -18,7 +18,6 @@ export default function InputField({
   readOnly,
   required,
   labelClassName,
-  inputClassName,
   ...props
 }: InputProps<SubscriptionFormValues>) {
   const hasError = Boolean(error);

@@ -17,7 +17,8 @@ import { deleteSubscription, getSubscriptions } from "@/libs/api/subscription";
 import { convertBaseCurrency } from "@/libs/helper/currency-converter";
 import { useCurrencyStore } from "@/store/profile";
 import { useToastStore } from "@/store/toast";
-import { determineCycleType } from "@/utils/helper";
+import { CycleType } from "@/types/subscription";
+import { formatCycleDisplay } from "@/utils/helper";
 
 export default function SubscriptionTable(): React.ReactNode {
   const { setIsOpen: setIsToastOpen, setMessage, setType } = useToastStore();
@@ -72,7 +73,11 @@ export default function SubscriptionTable(): React.ReactNode {
             <span className="text-gray-500 sm:hidden">Next Billing Date</span>
             <div className="flex flex-col gap-1">
               <p className="text-right text-xs text-gray-500 sm:text-left">
-                {determineCycleType(row.original.cycleInMonths)}
+                {formatCycleDisplay(
+                  row.original.cycleType as CycleType,
+                  row.original.cycleInMonths,
+                  row.original.cycleDays
+                )}
               </p>
               <p className="text-right sm:text-left">
                 {moment(row.original.endDate).format("MMM DD, YYYY")}
@@ -144,7 +149,7 @@ export default function SubscriptionTable(): React.ReactNode {
         ),
       },
     ],
-    [rates],
+    [rates, baseCurrency],
   );
 
   const handleDeleteSubscription = async () => {

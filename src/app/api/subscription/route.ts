@@ -79,29 +79,30 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const {
-      name,
-      currency,
-      price,
-      cycle,
-      cycle_type,
-      cycle_days,
-      start_date,
-      end_date,
-      url
-    } = await request.json();
+    const body = await request.json();
+
+    // Map both camelCase (from form) and snake_case field names
+    const name = body.name;
+    const currency = body.currency;
+    const price = body.price;
+    const cycleType = body.cycleType || body.cycle_type || 'MONTHLY';
+    const cycleInMonths = body.cycleInMonths || body.cycle;
+    const cycleDays = body.cycleDays !== undefined ? body.cycleDays : (body.cycle_days || null);
+    const startDate = body.startDate || body.start_date;
+    const endDate = body.endDate || body.end_date;
+    const url = body.url;
 
     const subscription = await prisma.subscription.create({
       data: {
-        userId: session?.user.sub!,
+        userId: session.user.sub,
         name,
         currency,
         price,
-        cycleType: cycle_type || 'MONTHLY',
-        cycleInMonths: cycle,
-        cycleDays: cycle_days || null,
-        startDate: new Date(start_date),
-        endDate: new Date(end_date),
+        cycleType,
+        cycleInMonths,
+        cycleDays,
+        startDate: new Date(startDate),
+        endDate: new Date(endDate),
         url,
       },
       select: {

@@ -32,7 +32,8 @@ type EmailProcessResult = {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ cron: string }> }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _context: { params: Promise<{ cron: string }> }
 ) {
   if (!isVercelCron(request)) {
     console.error("[Subscription Reminder] Unauthorized access attempt");

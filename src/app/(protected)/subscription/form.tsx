@@ -41,6 +41,7 @@ const INITIAL_FORM_VALUES: SubscriptionFormValues = {
   price: 0,
   cycle_type: "MONTHLY",
   cycle: 1,
+  cycle_days: undefined,
   start_date: new Date().toISOString().split("T")[0],
   end_date: moment(new Date().toISOString().split("T")[0])
     .startOf("month")
@@ -83,19 +84,49 @@ export default function SubscriptionForm({
 
   const watchedStartDate = watch("start_date");
   const watchedCycle = watch("cycle");
+  const watchedCycleDays = watch("cycle_days");
+  const watchedCycleType = watch("cycle_type");
 
   useEffect(() => {
-    if (watchedStartDate && watchedCycle) {
-      const startDate = moment(watchedStartDate);
-      let endDate = startDate.clone().add(Number(watchedCycle), "months");
+    if (!watchedStartDate) return;
 
-      if (startDate.date() === startDate.endOf("month").date()) {
-        endDate = endDate.endOf("month");
-      }
+    const startDate = moment(watchedStartDate);
+    let endDate: moment.Moment;
 
-      setValue("end_date", endDate.format("YYYY-MM-DD"));
+    switch (watchedCycleType) {
+      case "DAILY":
+        // Daily cycle: add 1 day
+        endDate = startDate.clone().add(1, "days");
+        break;
+
+      case "MONTHLY":
+        // Monthly cycle: add X months
+        if (watchedCycle) {
+          endDate = startDate.clone().add(Number(watchedCycle), "months");
+          // Preserve end of month if start date was end of month
+          if (startDate.date() === startDate.clone().endOf("month").date()) {
+            endDate = endDate.endOf("month");
+          }
+        } else {
+          return;
+        }
+        break;
+
+      case "CUSTOM":
+        // Custom cycle: add X days
+        if (watchedCycleDays) {
+          endDate = startDate.clone().add(Number(watchedCycleDays), "days");
+        } else {
+          return;
+        }
+        break;
+
+      default:
+        return;
     }
-  }, [watchedStartDate, watchedCycle, reset]);
+
+    setValue("end_date", endDate.format("YYYY-MM-DD"));
+  }, [watchedStartDate, watchedCycle, watchedCycleDays, watchedCycleType, setValue]);
 
   useEffect(() => {
     const subscriptionCurrency = currencyOptions.find(
@@ -106,7 +137,9 @@ export default function SubscriptionForm({
       name: subscription?.name ?? INITIAL_FORM_VALUES.name,
       currency: subscriptionCurrency ?? INITIAL_FORM_VALUES.currency,
       price: subscription?.price ?? INITIAL_FORM_VALUES.price,
+      cycle_type: subscription?.cycleType ?? INITIAL_FORM_VALUES.cycle_type,
       cycle: subscription?.cycleInMonths ?? INITIAL_FORM_VALUES.cycle,
+      cycle_days: subscription?.cycleDays ?? INITIAL_FORM_VALUES.cycle_days,
       start_date: subscription?.startDate
         ? new Date(subscription.startDate).toISOString().split("T")[0]
         : INITIAL_FORM_VALUES.start_date,
@@ -219,10 +252,51 @@ export default function SubscriptionForm({
               helperText={errors.price?.message}
               required
               onBlur={(e) => {
-                !isNaN(parseInt(e.target.value)) &&
+                if (!isNaN(parseInt(e.target.value))) {
                   setValue("price", Number(e.target.value));
+                }
               }}
             />
+          </div>
+
+          <div className="col-span-9">
+            <label className="block text-sm font-medium leading-6 text-gray-900">
+              Cycle Type <span className="text-red-500">*</span>
+            </label>
+            <div className="mt-2 flex gap-4">
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="radio"
+                  value="DAILY"
+                  {...register("cycle_type")}
+                  className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                />
+                <span className="text-sm text-gray-700">Daily</span>
+              </label>
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="radio"
+                  value="MONTHLY"
+                  {...register("cycle_type")}
+                  className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                />
+                <span className="text-sm text-gray-700">Monthly</span>
+              </label>
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="radio"
+                  value="CUSTOM"
+                  {...register("cycle_type")}
+                  className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                />
+                <span className="text-sm text-gray-700">Custom</span>
+              </label>
+            </div>
+            {errors.cycle_type && (
+              <p className="mt-2 text-sm text-red-600">
+                {errors.cycle_type.message}
+              </p>
+            )}
           </div>
 
           <div className="col-span-9 sm:col-span-3">
@@ -238,27 +312,55 @@ export default function SubscriptionForm({
             />
           </div>
 
-          <div className="col-span-9 sm:col-span-3">
-            <InputField
-              type="number"
-              id="cycle"
-              label={
-                <>
-                  Cycle <span className="text-xs text-gray-500">/ months</span>
-                </>
-              }
-              name="cycle"
-              register={register}
-              error={!!errors.cycle}
-              helperText={errors.cycle?.message}
-              required
-              min={1}
-              onBlur={(e) => {
-                !isNaN(parseInt(e.target.value)) &&
-                  setValue("cycle", Number(e.target.value));
-              }}
-            />
-          </div>
+          {watchedCycleType === "MONTHLY" && (
+            <div className="col-span-9 sm:col-span-3">
+              <InputField
+                type="number"
+                id="cycle"
+                label={
+                  <>
+                    Cycle <span className="text-xs text-gray-500">/ months</span>
+                  </>
+                }
+                name="cycle"
+                register={register}
+                error={!!errors.cycle}
+                helperText={errors.cycle?.message}
+                required
+                min={1}
+                onBlur={(e) => {
+                  if (!isNaN(parseInt(e.target.value))) {
+                    setValue("cycle", Number(e.target.value));
+                  }
+                }}
+              />
+            </div>
+          )}
+
+          {(watchedCycleType === "CUSTOM") && (
+            <div className="col-span-9 sm:col-span-3">
+              <InputField
+                type="number"
+                id="cycle_days"
+                label={
+                  <>
+                    Cycle <span className="text-xs text-gray-500">/ days</span>
+                  </>
+                }
+                name="cycle_days"
+                register={register}
+                error={!!errors.cycle_days}
+                helperText={errors.cycle_days?.message}
+                required
+                min={1}
+                onBlur={(e) => {
+                  if (!isNaN(parseInt(e.target.value))) {
+                    setValue("cycle_days", Number(e.target.value));
+                  }
+                }}
+              />
+            </div>
+          )}
 
           <div className="col-span-9 sm:col-span-3">
             <InputField

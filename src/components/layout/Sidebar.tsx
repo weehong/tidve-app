@@ -68,7 +68,7 @@ export default function Sidebar({
     if (data?.currency) {
       setBaseCurrency(data.currency);
     }
-  }, [pathname]);
+  }, [pathname, data?.currency, mutate, setBaseCurrency]);
 
   return (
     <div id="sidebar">

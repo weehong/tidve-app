@@ -6,6 +6,7 @@ import { auth0 } from "@/libs/auth/auth0";
 
 const prisma = new PrismaClient();
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     const session = await auth0.getSession();

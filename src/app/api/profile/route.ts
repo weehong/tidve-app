@@ -43,16 +43,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     }
 
     const profile = await prisma.profile.upsert({
-      where: { userId: session?.user.sub! },
+      where: { userId: session.user.sub },
       update: {
         isInitial: body.isInitial,
         currency: body.currency,
         name: body.name,
       },
       create: {
-        userId: session?.user.sub!,
-        email: session?.user.email!,
-        name: session?.user.name!,
+        userId: session.user.sub,
+        email: session.user.email || "",
+        name: session.user.name || "",
         isInitial: body.isInitial,
         currency: body.currency,
       },

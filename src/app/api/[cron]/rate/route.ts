@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 
 import { getExternalExchangeRates } from "@/libs/api/rate";
+import { isVercelCron } from "@/libs/helper/check-cron-header";
 
 const prisma = new PrismaClient();
 
@@ -14,8 +15,16 @@ type UpdatedRate = {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ cron: string }> }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _context: { params: Promise<{ cron: string }> }
 ): Promise<NextResponse> {
+  if (!isVercelCron(request)) {
+    console.error("[Rate Update] Unauthorized access attempt");
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  console.log("[Rate Update] Starting currency rate update");
+
   try {
     const currencies = await getExternalExchangeRates();
     if (!currencies?.rates) {
