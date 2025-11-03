@@ -126,7 +126,13 @@ export default function SubscriptionForm({
     }
 
     setValue("end_date", endDate.format("YYYY-MM-DD"));
-  }, [watchedStartDate, watchedCycle, watchedCycleDays, watchedCycleType, setValue]);
+  }, [
+    watchedStartDate,
+    watchedCycle,
+    watchedCycleDays,
+    watchedCycleType,
+    setValue,
+  ]);
 
   useEffect(() => {
     const subscriptionCurrency = currencyOptions.find(
@@ -260,10 +266,10 @@ export default function SubscriptionForm({
           </div>
 
           <div className="col-span-9">
-            <label className="block text-sm font-medium leading-6 text-gray-900">
+            <label className="block text-sm leading-6 font-medium text-gray-900">
               Cycle Type <span className="text-red-500">*</span>
             </label>
-            <div className="mt-2 flex gap-4">
+            <div className="mt-2 flex justify-between gap-4">
               <label className="flex cursor-pointer items-center gap-2">
                 <input
                   type="radio"
@@ -319,7 +325,8 @@ export default function SubscriptionForm({
                 id="cycle"
                 label={
                   <>
-                    Cycle <span className="text-xs text-gray-500">/ months</span>
+                    Cycle{" "}
+                    <span className="text-xs text-gray-500">/ months</span>
                   </>
                 }
                 name="cycle"
@@ -337,7 +344,7 @@ export default function SubscriptionForm({
             </div>
           )}
 
-          {(watchedCycleType === "CUSTOM") && (
+          {watchedCycleType === "CUSTOM" && (
             <div className="col-span-9 sm:col-span-3">
               <InputField
                 type="number"

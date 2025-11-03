@@ -8,6 +8,17 @@
   --font-instrument: "Instrument Sans";
 }
 
+@layer utilities {
+  .scrollbar-hide {
+    scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none; /* For IE/Edge */
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none; /* For Chrome/Safari */
+  }
+}
+
 h1,
 h2,
 h3,

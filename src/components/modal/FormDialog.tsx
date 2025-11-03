@@ -24,8 +24,8 @@ export default function FormDialog({
         isOpen ? "block" : "hidden",
       )}
     >
-      <div className="relative max-h-full w-full max-w-md p-4">
-        <div className="relative rounded-lg bg-white shadow-sm dark:bg-gray-700">
+      <div className="scrollbar-hide relative max-h-full w-full max-w-md overflow-auto p-4">
+        <div className="overflow-autp relative rounded-lg bg-white shadow-sm dark:bg-gray-700">
           <div className="flex items-center justify-between rounded-t border-b border-gray-200 p-4 md:p-5 dark:border-gray-600">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
               {title}
