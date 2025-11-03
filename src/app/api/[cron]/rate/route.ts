@@ -116,8 +116,6 @@ export async function GET(
       { status: 500 },
     );
   } finally {
-    if (process.env.NODE_ENV === "development") {
-      await prisma.$disconnect();
-    }
+    await prisma.$disconnect();
   }
 }

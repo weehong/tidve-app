@@ -4,7 +4,9 @@ import { CurrencyRateProps } from "@/types/exchange-rate";
 
 export const getExternalExchangeRates =
   async (): Promise<CurrencyRateProps> => {
-    const res = await fetch("https://api.fxratesapi.com/latest?base=USD");
+    const res = await fetch("https://api.fxratesapi.com/latest?base=USD", {
+      signal: AbortSignal.timeout(5000), // 5 second timeout
+    });
 
     if (!res.ok) {
       console.error("Failed to fetch exchange rates");
