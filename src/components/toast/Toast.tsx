@@ -5,13 +5,12 @@ import { useEffect, useMemo } from "react";
 import {
   CheckCircleIcon,
   ExclamationTriangleIcon,
+  InformationCircleIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import classNames from "classnames";
 
-import { useToastStore } from "@/store/toast";
-
-type ToastType = "success" | "error" | "warning";
+import { Toast as ToastType, useToastStore } from "@/store/toast";
 
 interface ToastStyleConfig {
   container: string;
@@ -19,10 +18,14 @@ interface ToastStyleConfig {
   IconComponent: React.ElementType;
 }
 
-export default function Toast() {
-  const { isOpen, setIsOpen, message, type } = useToastStore();
+interface SingleToastProps {
+  toast: ToastType;
+  index: number;
+  onRemove: (id: string) => void;
+}
 
-  const styleConfig: Record<ToastType, ToastStyleConfig> = useMemo(
+function SingleToast({ toast, index, onRemove }: SingleToastProps) {
+  const styleConfig: Record<string, ToastStyleConfig> = useMemo(
     () => ({
       success: {
         container:
@@ -41,30 +44,35 @@ export default function Toast() {
         icon: "bg-orange-100 text-orange-500 dark:bg-orange-700 dark:text-orange-200",
         IconComponent: ExclamationTriangleIcon,
       },
+      info: {
+        container:
+          "bg-blue-100 text-blue-500 dark:bg-blue-800 dark:text-blue-200",
+        icon: "bg-blue-100 text-blue-500 dark:bg-blue-800 dark:text-blue-200",
+        IconComponent: InformationCircleIcon,
+      },
     }),
     [],
   );
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    if (isOpen) {
-      timeoutId = setTimeout(() => setIsOpen(false), 3000);
-    }
+    const timeoutId = setTimeout(() => onRemove(toast.id), 3000);
     return () => clearTimeout(timeoutId);
-  }, [isOpen, setIsOpen]);
+  }, [toast.id, onRemove]);
 
-  if (!isOpen) return null;
-
-  const currentStyle = styleConfig[type as ToastType];
+  const currentStyle = styleConfig[toast.type];
   const { IconComponent } = currentStyle;
+
+  // Calculate top position for stacking: 20px base + (index * 80px spacing)
+  const topPosition = 20 + index * 80;
 
   return (
     <div
       role="alert"
       className={classNames(
-        "absolute top-5 left-1/2 z-50 ml-auto flex w-full max-w-xs -translate-x-1/2 items-center rounded-lg p-4 text-gray-500 shadow-sm transition sm:top-20 sm:right-5 sm:-translate-x-0 dark:bg-gray-800 dark:text-gray-400",
+        "fixed left-1/2 z-[9999] ml-auto flex w-full max-w-xs -translate-x-1/2 items-center rounded-lg p-4 text-gray-500 shadow-lg transition-all duration-300 ease-in-out sm:left-auto sm:right-5 sm:translate-x-0 dark:bg-gray-800 dark:text-gray-400",
         currentStyle.container,
       )}
+      style={{ top: `${topPosition}px` }}
     >
       <div
         className={classNames(
@@ -75,11 +83,11 @@ export default function Toast() {
         <IconComponent className="h-10 w-10" />
       </div>
 
-      <div className="mx-3 text-sm font-normal">{message}</div>
+      <div className="mx-3 text-sm font-normal">{toast.message}</div>
 
       <button
         type="button"
-        onClick={() => setIsOpen(false)}
+        onClick={() => onRemove(toast.id)}
         className="ms-auto inline-flex h-8 w-8 items-center justify-center rounded-lg p-1.5 text-gray-900 hover:bg-gray-100 hover:text-gray-900 focus:ring-2 focus:ring-gray-300 dark:bg-gray-800 dark:text-gray-500 dark:hover:bg-gray-700 dark:hover:text-white"
         aria-label="Close"
       >
@@ -87,5 +95,24 @@ export default function Toast() {
         <XMarkIcon className="h-3 w-3" />
       </button>
     </div>
+  );
+}
+
+export default function Toast() {
+  const { toasts, removeToast } = useToastStore();
+
+  if (toasts.length === 0) return null;
+
+  return (
+    <>
+      {toasts.map((toast, index) => (
+        <SingleToast
+          key={toast.id}
+          toast={toast}
+          index={index}
+          onRemove={removeToast}
+        />
+      ))}
+    </>
   );
 }
