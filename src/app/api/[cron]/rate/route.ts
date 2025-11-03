@@ -4,6 +4,7 @@ import { PrismaClient } from "@prisma/client";
 
 import { getExternalExchangeRates } from "@/libs/api/rate";
 import { isVercelCron } from "@/libs/helper/check-cron-header";
+import { storeRateSnapshot } from "@/utils/rate-history";
 
 const prisma = new PrismaClient();
 
@@ -33,6 +34,11 @@ export async function GET(
         { status: 500 },
       );
     }
+
+    // STEP 1: Store complete snapshot in history
+    // This stores ALL rates from the external API, creating a complete historical record
+    const historyCount = await storeRateSnapshot(currencies.rates, "cron");
+    console.log(`[Rate Update] Stored ${historyCount} rates in history`);
 
     const existingRates = await prisma.rate.findMany({
       select: { code: true, rate: true },
@@ -82,7 +88,12 @@ export async function GET(
     }
 
     return NextResponse.json({
-      message: `${updates.length} record(s) updated`,
+      message: `${updates.length} rate(s) updated, ${historyCount} stored in history`,
+      summary: {
+        ratesUpdated: updates.length,
+        ratesInHistory: historyCount,
+        timestamp: new Date().toISOString(),
+      },
       updates: updates.map((update) => ({
         code: update.code,
         previousRate: update.previousRate,

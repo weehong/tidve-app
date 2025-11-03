@@ -64,3 +64,16 @@ model Rate {
   @@index([code])
   @@map("rates")
 }
+
+model RateHistory {
+  id        Int      @id @default(autoincrement())
+  code      String   @map("code")
+  rate      Float    @map("rate")
+  source    String   @default("cron") @map("source")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([code])
+  @@index([createdAt])
+  @@index([code, createdAt])
+  @@map("rate_history")
+}
