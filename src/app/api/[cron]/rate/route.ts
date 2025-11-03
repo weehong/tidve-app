@@ -44,6 +44,22 @@ export async function GET(
     const updates: UpdatedRate[] = [];
     for (const [code, newRate] of Object.entries(currencies.rates)) {
       const previousRate = existingRatesMap.get(code);
+
+      /**
+       * Conservative Budgeting Strategy: Keep the HIGHEST rate
+       *
+       * Why? For expense tracking, using the highest historical rate provides:
+       * 1. Conservative budgeting - never underestimate costs
+       * 2. Safety margin - protect against currency fluctuations
+       * 3. Pleasant surprises - when rates favor you, you save vs budget
+       *
+       * Example: €100 subscription
+       * - Highest rate (1.10): Budget $110
+       * - Current rate drops to 1.05: Actual cost $105 (saved $5!)
+       * - Current rate rises to 1.08: Actual cost $108 (still within budget)
+       *
+       * This ensures users never face unexpected higher expenses.
+       */
       if (!previousRate || newRate > previousRate) {
         updates.push({
           code,
