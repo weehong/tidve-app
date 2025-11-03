@@ -13,8 +13,8 @@ const prisma = new PrismaClient();
 const getResend = () => new Resend(process.env.RESEND_API_KEY);
 
 const EMAIL_CONFIG = {
-  FROM: "Tidve <tidve@resend.dev>",
-  SUBJECT: "Tidve - Subscription Renewal Reminder",
+  FROM: "Tidverse <tidverse@resend.dev>",
+  SUBJECT: "Tidverse - Subscription Renewal Reminder",
 } as const;
 
 const REMINDER_PERIODS = {

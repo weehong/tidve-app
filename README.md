@@ -1,4 +1,4 @@
-# Tidve App
+# Tidverse App
 
 <div style="display: flex; justify-content: space-between; gap: 10px; margin-bottom: 20px;">
     <img src="screenshots/home.png" alt="Home" style="width: 32%;">
@@ -6,7 +6,7 @@
     <img src="screenshots/subscription.png" alt="Subscription" style="width: 32%;">
 </div>
 
-This Tidve App is a small module of a finance management application. It serves as a helpful tool for users to track and analyze their monthly expenses, including but not limited to subscriptions, installments, fixed expenses, and more.
+This Tidverse App is a small module of a finance management application. It serves as a helpful tool for users to track and analyze their monthly expenses, including but not limited to subscriptions, installments, fixed expenses, and more.
 
 By providing a comprehensive overview, the app allows users to gain valuable insights into their spending habits from month to month at a glance.
 
@@ -45,7 +45,7 @@ Before you begin, ensure you have the following installed:
 
 ```bash
 git clone <repository-url>
-cd tidve-app
+cd tidverse-app
 ```
 
 ### 2. Install Dependencies
@@ -60,7 +60,7 @@ Create a `.env` file in the root directory with the following variables:
 
 ```env
 # Database
-DATABASE_URL="postgresql://username:password@localhost:5432/tidve?schema=public"
+DATABASE_URL="postgresql://username:password@localhost:5432/tidverse?schema=public"
 
 # Auth0
 AUTH0_SECRET="your-auth0-secret"
@@ -75,7 +75,7 @@ RESEND_API_KEY="your-resend-api-key"
 
 ### 4. Database Setup
 
-1. Create a PostgreSQL database named `tidve`
+1. Create a PostgreSQL database named `tidverse`
 2. Run Prisma migrations:
 ```bash
 npx prisma migrate dev

@@ -57,7 +57,7 @@ export default async function Navbar(): Promise<React.ReactNode> {
               </a>
             )}
             <a
-              href="https://github.com/weehong/tidve-app"
+              href="https://github.com/weehong/tidverse-app"
               target="_blank"
               rel="noopener noreferrer"
             >

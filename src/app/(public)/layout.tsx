@@ -9,30 +9,30 @@ import Navbar from "@/components/layout/Navbar";
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
-  name: "Tidve App",
+  name: "Tidverse App",
   description:
     "Track and understand your monthly commitment based on your preferred currency",
-  url: "https://tidve.vercel.app/",
+  url: "https://tidverse.vercel.app/",
 };
 
 export const metadata: Metadata = {
-  title: "Tidve App",
+  title: "Tidverse App",
   description:
     "Track and understand your monthly commitment based on your preferred currency",
   openGraph: {
-    title: "Tidve App",
+    title: "Tidverse App",
     description:
       "Track and understand your monthly commitment based on your preferred currency",
-    url: "https://tidve.vercel.app/",
+    url: "https://tidverse.vercel.app/",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tidve App",
+    title: "Tidverse App",
     description:
       "Track and understand your monthly commitment based on your preferred currency",
   },
   alternates: {
-    canonical: "https://tidve.vercel.app/",
+    canonical: "https://tidverse.vercel.app/",
   },
   robots: {
     index: true,
