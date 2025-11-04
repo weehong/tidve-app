@@ -8,7 +8,6 @@ datasource db {
 }
 
 enum CycleType {
-  DAILY
   MONTHLY
   CUSTOM
 }

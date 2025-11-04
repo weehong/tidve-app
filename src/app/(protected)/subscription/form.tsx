@@ -39,13 +39,12 @@ const INITIAL_FORM_VALUES: SubscriptionFormValues = {
     label: "USD",
   },
   price: 0,
-  cycle_type: "MONTHLY",
+  cycle_type: "CUSTOM",
   cycle: 1,
-  cycle_days: undefined,
+  cycle_days: 1,
   start_date: new Date().toISOString().split("T")[0],
   end_date: moment(new Date().toISOString().split("T")[0])
-    .startOf("month")
-    .add(1, "months")
+    .add(1, "days")
     .format("YYYY-MM-DD"),
   url: undefined,
 } as const;
@@ -94,11 +93,6 @@ export default function SubscriptionForm({
     let endDate: moment.Moment;
 
     switch (watchedCycleType) {
-      case "DAILY":
-        // Daily cycle: add 1 day
-        endDate = startDate.clone().add(1, "days");
-        break;
-
       case "MONTHLY":
         // Monthly cycle: add X months
         if (watchedCycle) {
@@ -113,7 +107,7 @@ export default function SubscriptionForm({
         break;
 
       case "CUSTOM":
-        // Custom cycle: add X days
+        // Custom cycle: add X days (supports daily, weekly, bi-weekly, etc.)
         if (watchedCycleDays) {
           endDate = startDate.clone().add(Number(watchedCycleDays), "days");
         } else {
@@ -269,16 +263,7 @@ export default function SubscriptionForm({
             <label className="block text-sm leading-6 font-medium text-gray-900">
               Cycle Type <span className="text-red-500">*</span>
             </label>
-            <div className="mt-2 flex justify-between gap-4">
-              <label className="flex cursor-pointer items-center gap-2">
-                <input
-                  type="radio"
-                  value="DAILY"
-                  {...register("cycle_type")}
-                  className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                />
-                <span className="text-sm text-gray-700">Daily</span>
-              </label>
+            <div className="mt-2 flex justify-start gap-8">
               <label className="flex cursor-pointer items-center gap-2">
                 <input
                   type="radio"
@@ -295,7 +280,7 @@ export default function SubscriptionForm({
                   {...register("cycle_type")}
                   className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
                 />
-                <span className="text-sm text-gray-700">Custom</span>
+                <span className="text-sm text-gray-700">Days</span>
               </label>
             </div>
             {errors.cycle_type && (
@@ -351,7 +336,7 @@ export default function SubscriptionForm({
                 id="cycle_days"
                 label={
                   <>
-                    Cycle <span className="text-xs text-gray-500">/ days</span>
+                    Days <span className="text-xs text-gray-500">per cycle</span>
                   </>
                 }
                 name="cycle_days"

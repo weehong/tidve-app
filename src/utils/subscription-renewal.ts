@@ -17,9 +17,9 @@ export interface RenewalCalculation {
  * Calculate the next renewal dates for a subscription
  *
  * @param currentEndDate - The current end date of the subscription
- * @param cycleType - The type of billing cycle (DAILY, MONTHLY, CUSTOM)
+ * @param cycleType - The type of billing cycle (MONTHLY, CUSTOM)
  * @param cycleInMonths - Number of months for MONTHLY cycle
- * @param cycleDays - Number of days for DAILY or CUSTOM cycle
+ * @param cycleDays - Number of days for CUSTOM cycle (required for CUSTOM)
  * @returns Object containing new start date, end date, and days extended
  */
 export function calculateNextRenewalDates(
@@ -34,23 +34,17 @@ export function calculateNextRenewalDates(
   let newEndDate: Date;
 
   switch (cycleType) {
-    case CycleType.DAILY:
-      // For daily cycle, add 1 day
-      newEndDate = addDays(currentEndDate, 1);
-      break;
-
     case CycleType.MONTHLY:
       // For monthly cycle, add specified months
       newEndDate = addMonths(currentEndDate, cycleInMonths);
       break;
 
     case CycleType.CUSTOM:
-      // For custom cycle, use cycleDays if provided, otherwise default to cycleInMonths
+      // For custom cycle (daily, weekly, etc.), use cycleDays
       if (cycleDays && cycleDays > 0) {
         newEndDate = addDays(currentEndDate, cycleDays);
       } else {
-        // Fallback to monthly if cycleDays is not set
-        newEndDate = addMonths(currentEndDate, cycleInMonths);
+        throw new Error(`CUSTOM cycle type requires cycleDays to be set (got: ${cycleDays})`);
       }
       break;
 

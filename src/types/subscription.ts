@@ -1,5 +1,4 @@
 export enum CycleType {
-  DAILY = 'DAILY',
   MONTHLY = 'MONTHLY',
   CUSTOM = 'CUSTOM'
 }

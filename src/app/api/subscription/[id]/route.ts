@@ -72,10 +72,10 @@ export async function PUT(
     const url = body.url;
 
     // Check if endDate changed to reset email counter
-    // EXCEPT for daily 1-day subscriptions (they need emails every day)
+    // EXCEPT for 1-day subscriptions (they need emails every day)
     const endDateChanged = new Date(endDate).getTime() !== subscription.endDate.getTime();
-    const isDailyOneDay = cycleType === "daily" && cycleDays === 1;
-    const shouldResetEmailCounter = endDateChanged && !isDailyOneDay;
+    const isOneDayCycle = cycleType === "CUSTOM" && cycleDays === 1;
+    const shouldResetEmailCounter = endDateChanged && !isOneDayCycle;
 
     const updated = await prisma.subscription.update({
       where: { id: Number(id) },

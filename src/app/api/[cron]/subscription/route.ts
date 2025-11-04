@@ -61,9 +61,9 @@ export async function GET(
           lt: tomorrow, // But not future dates
         },
         NOT: {
-          // Don't reset daily 1-day subscriptions - they need emails every day
+          // Don't reset 1-day subscriptions - they need emails every day
           AND: [
-            { cycleType: "daily" },
+            { cycleType: "CUSTOM" },
             { cycleDays: 1 },
           ],
         },
@@ -161,9 +161,9 @@ export async function GET(
           );
 
           // Determine if email counter should be reset
-          // Daily 1-day subscriptions keep their counter (need emails every day)
-          const isDailyOneDay = sub.cycleType === "daily" && sub.cycleDays === 1;
-          const shouldResetEmailCounter = !isDailyOneDay;
+          // 1-day subscriptions keep their counter (need emails every day)
+          const isOneDayCycle = sub.cycleType === "CUSTOM" && sub.cycleDays === 1;
+          const shouldResetEmailCounter = !isOneDayCycle;
 
           // Update subscription with new dates
           await tx.subscription.update({

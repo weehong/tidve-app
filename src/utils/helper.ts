@@ -37,17 +37,15 @@ export const formatCycleDisplay = (
   cycleDays?: number | null
 ): string => {
   switch (cycleType) {
-    case CycleType.DAILY:
-      return "Daily";
-
     case CycleType.MONTHLY:
       return determineCycleType(cycleInMonths);
 
     case CycleType.CUSTOM:
       if (cycleDays) {
+        if (cycleDays === 1) return "Daily";
         if (cycleDays === 7) return "Weekly";
         if (cycleDays === 14) return "Bi-Weekly";
-        return `Every ${cycleDays} days`;
+        return `Every ${cycleDays} ${cycleDays === 1 ? 'day' : 'days'}`;
       }
       return "Custom";
 

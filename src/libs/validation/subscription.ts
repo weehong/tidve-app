@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const CycleTypeEnum = z.enum(["DAILY", "MONTHLY", "CUSTOM"], {
+export const CycleTypeEnum = z.enum(["MONTHLY", "CUSTOM"], {
   required_error: "Cycle type is required",
   invalid_type_error: "Invalid cycle type",
 });
