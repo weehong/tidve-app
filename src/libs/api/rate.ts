@@ -5,7 +5,7 @@ import { CurrencyRateProps } from "@/types/exchange-rate";
 export const getExternalExchangeRates =
   async (): Promise<CurrencyRateProps> => {
     const res = await fetch("https://api.fxratesapi.com/latest?base=USD", {
-      signal: AbortSignal.timeout(3000), // 3 second timeout (optimized for Vercel Hobby 10s limit)
+      signal: AbortSignal.timeout(5000), // 5 second timeout
     });
 
     if (!res.ok) {

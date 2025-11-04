@@ -6,8 +6,6 @@ import { prisma } from "@/libs/prisma";
 import { storeRateSnapshot } from "@/utils/rate-history";
 
 // Allow up to 60 seconds for this cron job to complete
-// Note: Vercel Hobby plan has a hard 10-second limit regardless of this setting
-// Pro plan required for longer timeouts (up to 300s)
 export const maxDuration = 60;
 
 type UpdatedRate = {
