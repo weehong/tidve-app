@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { PrismaClient } from "@prisma/client";
-
 import { isVercelCron } from "@/libs/helper/check-cron-header";
+import { prisma } from "@/libs/prisma";
 import {
   calculateNextRenewalDates,
   shouldRenewSubscription,
   formatRenewalLog,
 } from "@/utils/subscription-renewal";
 import { CycleType } from "@/types/subscription";
-
-const prisma = new PrismaClient();
 
 type UpdatedSubscription = {
   id: number;
@@ -51,6 +48,7 @@ export async function GET(
     today.setHours(0, 0, 0, 0);
 
     // Reset email counter for subscriptions that started today (new cycle began)
+    // EXCEPT for daily subscriptions with 1-day cycle (they need emails every day)
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
@@ -62,11 +60,20 @@ export async function GET(
           gte: today, // Started today
           lt: tomorrow, // But not future dates
         },
+        NOT: {
+          // Don't reset daily 1-day subscriptions - they need emails every day
+          AND: [
+            { cycleType: "daily" },
+            { cycleDays: 1 },
+          ],
+        },
       },
       select: {
         id: true,
         name: true,
         numberEmailSent: true,
+        cycleType: true,
+        cycleDays: true,
       },
     });
 
@@ -153,13 +160,18 @@ export async function GET(
             sub.cycleDays
           );
 
+          // Determine if email counter should be reset
+          // Daily 1-day subscriptions keep their counter (need emails every day)
+          const isDailyOneDay = sub.cycleType === "daily" && sub.cycleDays === 1;
+          const shouldResetEmailCounter = !isDailyOneDay;
+
           // Update subscription with new dates
           await tx.subscription.update({
             where: { id: sub.id },
             data: {
               startDate: renewal.newStartDate,
               endDate: renewal.newEndDate,
-              numberEmailSent: 0,
+              ...(shouldResetEmailCounter && { numberEmailSent: 0 }),
               updatedAt: new Date(),
             },
           });
@@ -248,9 +260,5 @@ export async function GET(
       },
       { status: 500 },
     );
-  } finally {
-    if (process.env.NODE_ENV === "development") {
-      await prisma.$disconnect();
-    }
   }
 }

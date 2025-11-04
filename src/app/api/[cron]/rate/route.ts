@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { PrismaClient } from "@prisma/client";
-
 import { getExternalExchangeRates } from "@/libs/api/rate";
 import { isVercelCron } from "@/libs/helper/check-cron-header";
+import { prisma } from "@/libs/prisma";
 import { storeRateSnapshot } from "@/utils/rate-history";
 
-const prisma = new PrismaClient();
+// Allow up to 60 seconds for this cron job to complete
+// Note: Vercel Hobby plan has a hard 10-second limit regardless of this setting
+// Pro plan required for longer timeouts (up to 300s)
+export const maxDuration = 60;
 
 type UpdatedRate = {
   code: string;
@@ -27,7 +29,14 @@ export async function GET(
   console.log("[Rate Update] Starting currency rate update");
 
   try {
-    const currencies = await getExternalExchangeRates();
+    // Run operations in parallel to save time
+    const [currencies, existingRates] = await Promise.all([
+      getExternalExchangeRates(),
+      prisma.rate.findMany({
+        select: { code: true, rate: true },
+      }),
+    ]);
+
     if (!currencies?.rates) {
       return NextResponse.json(
         { error: "Failed to fetch currencies from external API" },
@@ -35,14 +44,6 @@ export async function GET(
       );
     }
 
-    // STEP 1: Store complete snapshot in history
-    // This stores ALL rates from the external API, creating a complete historical record
-    const historyCount = await storeRateSnapshot(currencies.rates, "cron");
-    console.log(`[Rate Update] Stored ${historyCount} rates in history`);
-
-    const existingRates = await prisma.rate.findMany({
-      select: { code: true, rate: true },
-    });
     const existingRatesMap = new Map(
       existingRates.map((rate) => [rate.code, rate.rate]),
     );
@@ -75,17 +76,25 @@ export async function GET(
       }
     }
 
-    if (updates.length > 0) {
-      await prisma.$transaction(
-        updates.map(({ code, newRate }) =>
-          prisma.rate.upsert({
-            where: { code },
-            update: { rate: newRate },
-            create: { code, rate: newRate },
-          }),
-        ),
-      );
-    }
+    // Run updates and history storage in parallel for speed
+    const [historyCount] = await Promise.all([
+      storeRateSnapshot(currencies.rates, "cron"),
+      updates.length > 0
+        ? prisma.$transaction(
+            updates.map(({ code, newRate }) =>
+              prisma.rate.upsert({
+                where: { code },
+                update: { rate: newRate },
+                create: { code, rate: newRate },
+              }),
+            ),
+          )
+        : Promise.resolve(),
+    ]);
+
+    console.log(
+      `[Rate Update] Completed: ${updates.length} rates updated, ${historyCount} stored in history`
+    );
 
     return NextResponse.json({
       message: `${updates.length} rate(s) updated, ${historyCount} stored in history`,
@@ -115,7 +124,5 @@ export async function GET(
       },
       { status: 500 },
     );
-  } finally {
-    await prisma.$disconnect();
   }
 }

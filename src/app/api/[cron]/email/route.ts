@@ -1,15 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { PrismaClient } from "@prisma/client";
 import { Resend } from "resend";
 
 import SubscriptionRenewal from "@/emails/SubscriptionRenewal";
 import { isVercelCron } from "@/libs/helper/check-cron-header";
+import { prisma } from "@/libs/prisma";
 
 export const dynamic = "force-dynamic";
 export const fetchCache = "force-no-store";
-
-const prisma = new PrismaClient();
 const getResend = () => new Resend(process.env.RESEND_API_KEY);
 
 const EMAIL_CONFIG = {

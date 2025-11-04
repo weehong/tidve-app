@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { PrismaClient } from "@prisma/client";
-
 import { auth0 } from "@/libs/auth/auth0";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/libs/prisma";
 
 export async function GET(
   request: NextRequest,
@@ -75,7 +72,10 @@ export async function PUT(
     const url = body.url;
 
     // Check if endDate changed to reset email counter
+    // EXCEPT for daily 1-day subscriptions (they need emails every day)
     const endDateChanged = new Date(endDate).getTime() !== subscription.endDate.getTime();
+    const isDailyOneDay = cycleType === "daily" && cycleDays === 1;
+    const shouldResetEmailCounter = endDateChanged && !isDailyOneDay;
 
     const updated = await prisma.subscription.update({
       where: { id: Number(id) },
@@ -88,7 +88,7 @@ export async function PUT(
         cycleDays,
         startDate: new Date(startDate),
         endDate: new Date(endDate),
-        numberEmailSent: endDateChanged ? 0 : subscription.numberEmailSent,
+        numberEmailSent: shouldResetEmailCounter ? 0 : subscription.numberEmailSent,
         url,
         isActive: true,
       },
