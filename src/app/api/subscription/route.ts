@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { PrismaClient } from "@prisma/client";
-
 import { auth0 } from "@/libs/auth/auth0";
-
-const prisma = new PrismaClient({
-  log: ["query", "info", "warn", "error"],
-});
+import { prisma } from "@/libs/prisma";
 
 const PAGE_SIZE = 10;
 

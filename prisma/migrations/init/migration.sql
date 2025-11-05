@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "CycleType" AS ENUM ('DAILY', 'MONTHLY', 'CUSTOM');
+CREATE TYPE "CycleType" AS ENUM ('MONTHLY', 'CUSTOM');
 
 -- CreateTable
 CREATE TABLE "profiles" (
